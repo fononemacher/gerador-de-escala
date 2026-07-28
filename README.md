@@ -56,6 +56,7 @@ Tabela com um dia por coluna e um funcionário por linha:
 - Legenda e cabeçalho fixos no topo, coluna de funcionários fixa à esquerda
 - Cada clique em uma célula alterna o status no ciclo `T → F → FE → FC → T`
 - Banner de alertas listando os dias que não atingem os mínimos (por setor e geral)
+- Painel âmbar de **viabilidade** quando a configuração é impossível de cumprir (ver abaixo)
 - Filtro por setor e ordenação por nome ou por setor — o filtro afeta apenas a exibição; alertas, resumo e cobertura dominical continuam considerando toda a equipe
 - Resumo da escala e cobertura de cada domingo do mês
 
@@ -67,6 +68,23 @@ Tabela com um dia por coluna e um funcionário por linha:
 | `F` | Folga |
 | `FE` | Feriado Trabalhado |
 | `FC` | Folga Compensatória |
+
+## Alertas: dois níveis
+
+Nem toda configuração tem solução — às vezes não existe arranjo de folgas que atenda aos mínimos definidos. A aplicação separa os dois casos:
+
+| Painel | Quando aparece | O que significa |
+| --- | --- | --- |
+| **Âmbar — viabilidade** | Na etapa 2 (enquanto configura) e no topo da etapa 3 | Nenhuma combinação de folgas atenderia esses mínimos. É preciso mudar a configuração ou a equipe. |
+| **Vermelho — cobertura** | Na etapa 3 | Dias específicos que ficaram abaixo do mínimo na escala gerada. Se não houver problema de viabilidade, é só desencaixe da rotação e dá para ajustar clicando nas células. |
+
+O diagnóstico de viabilidade (`src/logica/viabilidade.js`) faz três verificações, sempre no **melhor cenário possível** — só acusa impossibilidade quando ela é matematicamente certa, nunca por suposição:
+
+1. **Equipe insuficiente** — o mínimo exigido é maior que o número de pessoas do grupo.
+2. **Domingos inviáveis** — as folgas dominicais obrigatórias derrubam a cobertura abaixo do mínimo do domingo.
+3. **Capacidade do mês estourada** — a soma dos mínimos de todos os dias excede os dias-pessoa que a equipe consegue trabalhar. É o caso mais comum: cabe em cada dia isolado, mas não no mês, porque a folga semanal é um custo inescapável.
+
+Exemplo real: 5 operadores de caixa com mínimo de 5 por dia em escala 6×1 num mês de 31 dias exige 155 dias-pessoa, mas 5 pessoas oferecem no máximo 135 — impossível. A mensagem informa quantos funcionários seriam necessários (6) e qual o mínimo sustentável com a equipe atual (4 por dia).
 
 ## Distribuição dos domingos
 

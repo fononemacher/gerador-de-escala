@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Cabecalho from "./componentes/Cabecalho";
 import Stepper from "./componentes/Stepper";
 import EtapaConfiguracao from "./etapas/EtapaConfiguracao";
@@ -31,6 +31,12 @@ export default function App() {
   const [funcionarios, setFuncionarios] = useState(FUNCIONARIOS_INICIAIS);
   const [config, setConfig] = useState(CONFIG_INICIAL);
   const [escala, setEscala] = useState(null);
+
+  // Cada etapa comeca do topo — caso contrario os avisos do inicio da pagina
+  // passam despercebidos ao vir de uma etapa longa.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [etapa]);
 
   function gerar() {
     const { dias, mapa } = gerarEscala({

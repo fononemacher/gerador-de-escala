@@ -2,7 +2,7 @@ import { AlertTriangle } from "lucide-react";
 import { CORES } from "../../estilos";
 
 /** Banner vermelho com os dias que nao atingem os minimos configurados. */
-export default function BannerAlertas({ alertas }) {
+export default function BannerAlertas({ alertas, configViavel = true }) {
   if (alertas.length === 0) return null;
 
   return (
@@ -14,11 +14,20 @@ export default function BannerAlertas({ alertas }) {
         padding: 16,
       }}
     >
-      <header style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-        <AlertTriangle size={17} color={CORES.erro} />
-        <strong style={{ fontSize: 13.5, color: "#991B1B" }}>
-          Cobertura mínima não atendida — {alertas.length} alerta(s)
-        </strong>
+      <header style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 10 }}>
+        <AlertTriangle size={17} color={CORES.erro} style={{ flexShrink: 0, marginTop: 1 }} />
+        <div style={{ minWidth: 0 }}>
+          <strong style={{ fontSize: 13.5, color: "#991B1B" }}>
+            Cobertura mínima não atendida — {alertas.length} alerta(s)
+          </strong>
+          {/* Sem problemas de viabilidade, a falta veio do encaixe da rotacao, nao da configuracao. */}
+          {configViavel ? (
+            <p style={{ margin: "3px 0 0", fontSize: 12, color: "#991B1B", opacity: 0.85 }}>
+              A configuração cabe no total do mês — foi a rotação que não encaixou nestes dias.
+              Clique nas células da tabela para ajustar manualmente.
+            </p>
+          ) : null}
+        </div>
       </header>
 
       <div style={{ maxHeight: 130, overflowY: "auto", display: "flex", flexDirection: "column", gap: 4 }}>

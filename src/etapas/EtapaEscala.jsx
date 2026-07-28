@@ -5,10 +5,12 @@ import CoberturaDominical from "./escala/CoberturaDominical";
 import TabelaEscala from "./escala/TabelaEscala";
 import Campo from "../componentes/Campo";
 import Cartao from "../componentes/Cartao";
+import PainelViabilidade from "../componentes/PainelViabilidade";
 import ResumoCard from "../componentes/ResumoCard";
 import { CORES, botaoSecundario, entrada, tituloCartao } from "../estilos";
 import { CICLO_STATUS, MESES, TIPOS_ESCALA } from "../constantes";
 import { calcularAlertas, coberturaDominical } from "../logica/alertas";
+import { analisarViabilidade } from "../logica/viabilidade";
 import { ordenarPorNome, setoresDaEquipe } from "../utils";
 
 export default function EtapaEscala({ escala, setEscala, funcionarios, config, onVoltar }) {
@@ -35,6 +37,12 @@ export default function EtapaEscala({ escala, setEscala, funcionarios, config, o
   const domingos = useMemo(
     () => coberturaDominical({ dias, mapa, funcionarios, diasComAlerta }),
     [dias, mapa, funcionarios, diasComAlerta]
+  );
+
+  // Explica por que certos dias ficaram em falta quando a exigencia era impossivel.
+  const problemasDeViabilidade = useMemo(
+    () => analisarViabilidade({ funcionarios, config }),
+    [funcionarios, config]
   );
 
   const funcionariosExibidos = useMemo(() => {
@@ -69,7 +77,9 @@ export default function EtapaEscala({ escala, setEscala, funcionarios, config, o
         3. Escala Gerada — {MESES[escala.mes]} {escala.ano} — {modelo.rotulo.toUpperCase()}
       </h2>
 
-      <BannerAlertas alertas={alertas} />
+      <PainelViabilidade problemas={problemasDeViabilidade} contexto="escala" />
+
+      <BannerAlertas alertas={alertas} configViavel={problemasDeViabilidade.length === 0} />
 
       <Cartao estilo={{ padding: 14 }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "flex-end" }}>

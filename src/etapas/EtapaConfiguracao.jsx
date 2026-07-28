@@ -6,8 +6,10 @@ import CardMinimoSetor from "./config/CardMinimoSetor";
 import CardModoFolgas from "./config/CardModoFolgas";
 import CardPeriodo from "./config/CardPeriodo";
 import CardTipoEscala from "./config/CardTipoEscala";
+import PainelViabilidade from "../componentes/PainelViabilidade";
 import { botaoPrimario, botaoSecundario } from "../estilos";
 import { DIAS_SEMANA } from "../constantes";
+import { analisarViabilidade } from "../logica/viabilidade";
 import { objetoSemana, setoresDaEquipe } from "../utils";
 
 const SETOR_PADRAO = { simples: 0, avancado: false, porDia: objetoSemana(0) };
@@ -20,6 +22,12 @@ export default function EtapaConfiguracao({
   onGerar,
 }) {
   const setores = useMemo(() => setoresDaEquipe(funcionarios), [funcionarios]);
+
+  // Recalculado a cada ajuste, para o aviso aparecer antes de gerar a escala.
+  const problemasDeViabilidade = useMemo(
+    () => analisarViabilidade({ funcionarios, config }),
+    [funcionarios, config]
+  );
 
   const contagemPorSetor = useMemo(() => {
     const contagem = {};
@@ -152,6 +160,8 @@ export default function EtapaConfiguracao({
         onAdicionar={adicionarFeriado}
         onRemover={removerFeriado}
       />
+
+      <PainelViabilidade problemas={problemasDeViabilidade} />
 
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
         <button type="button" style={botaoSecundario} onClick={onVoltar}>
