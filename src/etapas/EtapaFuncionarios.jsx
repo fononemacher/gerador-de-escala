@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, Pencil, Plus, Save, Users, X } from "lucide-react";
+import { ArrowRight, Pencil, Plus, Save, Trash2, Users, X } from "lucide-react";
 import Badge from "../componentes/Badge";
 import Campo from "../componentes/Campo";
 import Cartao from "../componentes/Cartao";
@@ -13,6 +13,7 @@ export default function EtapaFuncionarios({ funcionarios, setFuncionarios, onAva
   const [formulario, setFormulario] = useState(FORM_VAZIO);
   const [erro, setErro] = useState("");
   const [editandoId, setEditandoId] = useState(null);
+  const [confirmandoLimpeza, setConfirmandoLimpeza] = useState(false);
 
   const emEdicao = editandoId !== null;
 
@@ -76,6 +77,12 @@ export default function EtapaFuncionarios({ funcionarios, setFuncionarios, onAva
     if (id === editandoId) cancelarEdicao();
   }
 
+  function limparTodos() {
+    setFuncionarios([]);
+    setConfirmandoLimpeza(false);
+    cancelarEdicao();
+  }
+
   function aoPressionarTecla(evento) {
     if (evento.key === "Enter") confirmar();
   }
@@ -86,6 +93,17 @@ export default function EtapaFuncionarios({ funcionarios, setFuncionarios, onAva
         titulo="1. Funcionários"
         subtitulo="Cadastre a equipe que fará parte da escala. Nome e função são obrigatórios."
         icone={<Users size={16} />}
+        acao={
+          funcionarios.length > 0 ? (
+            <BotaoLimparTudo
+              quantidade={funcionarios.length}
+              confirmando={confirmandoLimpeza}
+              onPedirConfirmacao={() => setConfirmandoLimpeza(true)}
+              onCancelar={() => setConfirmandoLimpeza(false)}
+              onConfirmar={limparTodos}
+            />
+          ) : null
+        }
       >
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "flex-end" }}>
           <Campo label="Nome do funcionário" flex="3 1 220px">
@@ -225,6 +243,84 @@ export default function EtapaFuncionarios({ funcionarios, setFuncionarios, onAva
         </button>
       </div>
     </div>
+  );
+}
+
+/**
+ * Limpeza da lista inteira. Como a acao nao tem desfazer e o estado nao e
+ * persistido, exige confirmacao em dois passos no proprio lugar do botao.
+ */
+function BotaoLimparTudo({ quantidade, confirmando, onPedirConfirmacao, onCancelar, onConfirmar }) {
+  const botaoCompacto = {
+    height: 32,
+    padding: "0 12px",
+    borderRadius: 8,
+    fontSize: 12,
+    fontWeight: 600,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    flexShrink: 0,
+  };
+
+  if (!confirmando) {
+    return (
+      <button
+        type="button"
+        onClick={onPedirConfirmacao}
+        style={{
+          ...botaoCompacto,
+          border: `1px solid ${CORES.bordaInput}`,
+          background: CORES.branco,
+          color: CORES.label,
+        }}
+      >
+        <Trash2 size={14} />
+        Limpar todos os funcionários
+      </button>
+    );
+  }
+
+  return (
+    <span
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-end",
+        flexWrap: "wrap",
+        gap: 8,
+        marginLeft: "auto",
+      }}
+    >
+      <span style={{ fontSize: 12, fontWeight: 600, color: CORES.erro }}>
+        Remover os {quantidade} funcionários?
+      </span>
+      <button
+        type="button"
+        onClick={onConfirmar}
+        style={{
+          ...botaoCompacto,
+          border: `1px solid ${CORES.erro}`,
+          background: CORES.erro,
+          color: CORES.branco,
+        }}
+      >
+        <Trash2 size={14} />
+        Sim, limpar tudo
+      </button>
+      <button
+        type="button"
+        onClick={onCancelar}
+        style={{
+          ...botaoCompacto,
+          border: `1px solid ${CORES.bordaInput}`,
+          background: CORES.branco,
+          color: CORES.label,
+        }}
+      >
+        Cancelar
+      </button>
+    </span>
   );
 }
 

@@ -10,6 +10,7 @@ export default function Cartao({ titulo, subtitulo, icone, acao, children, estil
             display: "flex",
             alignItems: "flex-start",
             justifyContent: "space-between",
+            flexWrap: "wrap",
             gap: 12,
             marginBottom: 16,
           }}
