@@ -35,6 +35,56 @@ export function domingosDeFolga(totalDomingos, minimo, posicaoNoGrupo) {
 }
 
 /**
+ * Maior sequencia de trabalho que o ciclo escolhido admite — 5 no 5x2, 6 no 6x1,
+ * 1 no 12x36. O ciclo e duplicado para contar tambem a sequencia que atravessa a
+ * virada (fim de um ciclo emendado no inicio do seguinte).
+ */
+export function maxDiasSeguidos(ciclo) {
+  let atual = 0;
+  let maior = 0;
+  [...ciclo, ...ciclo].forEach((posicao) => {
+    atual = posicao === "T" ? atual + 1 : 0;
+    maior = Math.max(maior, atual);
+  });
+  return Math.min(maior, ciclo.length);
+}
+
+/**
+ * Garante o teto de dias consecutivos de trabalho, inserindo folgas onde a
+ * sequencia estoura. Necessario porque dois casos furam o ciclo:
+ *   - um domingo de trabalho obrigatorio entra no meio da sequencia, ja que o
+ *     ciclo so avanca nos demais dias;
+ *   - o modo "fixas" so folga no dia escolhido, o que daria 6 dias seguidos
+ *     mesmo em escalas de 5 dias.
+ * Altera `linha` no lugar.
+ */
+function limitarDiasSeguidos(linha, dias, limite, domingoTemRegraPropria) {
+  let seguidos = 0;
+
+  for (let i = 0; i < dias.length; i += 1) {
+    const dia = dias[i];
+
+    if (linha[dia.numero] === "F") {
+      seguidos = 0;
+      continue;
+    }
+
+    seguidos += 1;
+    if (seguidos <= limite) continue;
+
+    // Se quem estourou foi um domingo com folga ja distribuida pela regra dos
+    // domingos, a folga recua um dia para nao desfazer aquela distribuicao.
+    if (domingoTemRegraPropria && dia.diaSemana === 0 && i > 0) {
+      linha[dias[i - 1].numero] = "F";
+      seguidos = 1;
+    } else {
+      linha[dia.numero] = "F";
+      seguidos = 0;
+    }
+  }
+}
+
+/**
  * Monta a escala completa do mes.
  * Retorna { dias, mapa } onde mapa[idFuncionario][numeroDoDia] = status.
  */
@@ -53,6 +103,7 @@ export function gerarEscala({
   const domingos = dias.filter((dia) => dia.diaSemana === 0);
   const diasFeriado = new Set(feriados.map((feriado) => Number(feriado.dia)));
   const ciclo = (TIPOS_ESCALA.find((t) => t.id === tipoEscala) || TIPOS_ESCALA[0]).ciclo;
+  const limiteDeSequencia = maxDiasSeguidos(ciclo);
 
   // Posicao de cada funcionario dentro do grupo do proprio sexo (base do offset dos domingos).
   const contadorPorSexo = {};
@@ -79,9 +130,6 @@ export function gerarEscala({
     );
 
     const linha = {};
-    // Conta apenas os dias regidos pelo ciclo: assim os domingos ja resolvidos acima
-    // nao "consomem" a folga semanal de quem tem domingo obrigatorio de trabalho.
-    let passosDoCiclo = 0;
 
     dias.forEach((dia) => {
       let status;
@@ -93,16 +141,21 @@ export function gerarEscala({
         const diaFixo = Number(folgasFixas[funcionario.id]);
         status = dia.diaSemana === diaFixo ? "F" : "T";
       } else {
-        // Rotativas: o ciclo caminha pelos demais dias e e deslocado pelo indice do
-        // funcionario, de modo que a equipe nao folgue toda no mesmo dia.
-        status = ciclo[(indice + passosDoCiclo) % ciclo.length];
-        passosDoCiclo += 1;
+        // Rotativas: o ciclo caminha com o calendario e e deslocado pelo indice do
+        // funcionario, de modo que a equipe nao folgue toda no mesmo dia. Andar pelos
+        // dias corridos preserva o ritmo semanal; quando a folga do ciclo cai num
+        // domingo de trabalho obrigatorio, quem repoe o descanso e o limitador de
+        // dias seguidos, com uma folga so — nao uma por semana.
+        status = ciclo[(indice + dia.numero - 1) % ciclo.length];
       }
 
       if (status === "T" && diasFeriado.has(dia.numero)) status = "FE";
 
       linha[dia.numero] = status;
     });
+
+    // Ultimo passo: nenhum funcionario pode passar do teto de dias seguidos do ciclo.
+    limitarDiasSeguidos(linha, dias, limiteDeSequencia, minimoDomingos > 0);
 
     mapa[funcionario.id] = linha;
   });

@@ -88,6 +88,17 @@ O diagnóstico de viabilidade (`src/logica/viabilidade.js`) faz três verificaç
 
 Exemplo real: 5 operadores de caixa com mínimo de 5 por dia em escala 6×1 num mês de 31 dias exige 155 dias-pessoa, mas 5 pessoas oferecem no máximo 135 — impossível. A mensagem informa quantos funcionários seriam necessários (6) e qual o mínimo sustentável com a equipe atual (4 por dia).
 
+## Limite de dias consecutivos
+
+Nenhum funcionário trabalha mais dias seguidos do que o ciclo escolhido permite: 5 no 5×2 e no 5×1, 6 no 6×1, 6×2 e na espanhola, 1 no 12×36. O teto sai do próprio ciclo (a maior sequência de `T`, considerando também a emenda entre um ciclo e o seguinte).
+
+Dois pontos furavam o ciclo e por isso a regra é aplicada como passo final da geração, em `limitarDiasSeguidos`:
+
+- um **domingo de trabalho obrigatório** entra no meio da sequência quando a folga do ciclo cairia justamente nele;
+- o modo **fixas na semana** folga só no dia escolhido, o que daria 6 dias seguidos mesmo numa escala de 5.
+
+Quando a sequência estoura, entra uma folga. Se o dia excedente for um domingo já definido pela regra dos domingos, a folga recua um dia, para não desfazer a distribuição dominical.
+
 ## Distribuição dos domingos
 
 As folgas dominicais são espaçadas ao longo do mês, evitando domingos consecutivos: divide-se o total de domingos pelo mínimo configurado para obter o passo entre uma folga e a seguinte, e aplica-se um deslocamento derivado da posição do funcionário dentro do grupo do mesmo sexo — assim, colegas folgam em domingos diferentes e a loja permanece coberta. A lógica está em `src/logica/gerarEscala.js`.

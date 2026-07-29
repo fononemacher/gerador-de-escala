@@ -1,4 +1,5 @@
 import { TIPOS_ESCALA } from "../constantes";
+import { maxDiasSeguidos } from "./gerarEscala";
 import { diasDoMes, minimoDoSetor, setoresDaEquipe } from "../utils";
 
 /**
@@ -19,13 +20,18 @@ function minimoDominical(config, sexo) {
 function diasTrabalhaveis(funcionario, { dias, totalDias, totalDomingos, ciclo, config }) {
   const folgasDominicais = Math.min(minimoDominical(config, funcionario.sexo), totalDomingos);
 
+  // Teto de dias seguidos: obriga pelo menos uma folga a cada (limite + 1) dias,
+  // valendo para os dois modos de folga.
+  const limite = maxDiasSeguidos(ciclo);
+  const tetoPorSequencia = totalDias - Math.floor(totalDias / (limite + 1));
+
   if (config.modoFolgas === "fixas") {
     const diaFixo = Number(config.folgasFixas[funcionario.id]);
     // Folga fixa cai de segunda a sabado, entao nunca coincide com a folga de domingo.
     const ocorrenciasDoDiaFixo = Number.isNaN(diaFixo)
       ? 0
       : dias.filter((dia) => dia.diaSemana === diaFixo).length;
-    return totalDias - ocorrenciasDoDiaFixo - folgasDominicais;
+    return Math.min(tetoPorSequencia, totalDias - ocorrenciasDoDiaFixo - folgasDominicais);
   }
 
   const folgasNoCiclo = ciclo.filter((posicao) => posicao === "F").length;
@@ -33,10 +39,16 @@ function diasTrabalhaveis(funcionario, { dias, totalDias, totalDomingos, ciclo, 
   // Com minimo dominical configurado, o ciclo passa a reger apenas os demais dias.
   if (folgasDominicais > 0) {
     const diasForaDomingo = totalDias - totalDomingos;
-    return totalDias - folgasDominicais - Math.floor((diasForaDomingo * folgasNoCiclo) / ciclo.length);
+    return Math.min(
+      tetoPorSequencia,
+      totalDias - folgasDominicais - Math.floor((diasForaDomingo * folgasNoCiclo) / ciclo.length)
+    );
   }
 
-  return totalDias - Math.floor((totalDias * folgasNoCiclo) / ciclo.length);
+  return Math.min(
+    tetoPorSequencia,
+    totalDias - Math.floor((totalDias * folgasNoCiclo) / ciclo.length)
+  );
 }
 
 /**
