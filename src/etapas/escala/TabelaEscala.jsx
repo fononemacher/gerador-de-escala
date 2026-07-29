@@ -8,7 +8,14 @@ const LARGURA_NOME = 220;
 const LARGURA_DIA = 46;
 const ALTURA_LEGENDA = 45;
 
-export default function TabelaEscala({ dias, funcionarios, mapa, diasComAlerta, onAlternarStatus }) {
+export default function TabelaEscala({
+  dias,
+  funcionarios,
+  mapa,
+  diasComAlerta,
+  celulasEmExcesso,
+  onAlternarStatus,
+}) {
   const refLegenda = useRef(null);
   // O cabecalho gruda logo abaixo da legenda; em telas estreitas a legenda quebra
   // em mais de uma linha, entao o deslocamento acompanha a altura real dela.
@@ -161,6 +168,7 @@ export default function TabelaEscala({ dias, funcionarios, mapa, diasComAlerta, 
                   const status = mapa[funcionario.id]?.[dia.numero] || "T";
                   const visual = STATUS[status] || STATUS.T;
                   const domingo = dia.diaSemana === 0;
+                  const emExcesso = celulasEmExcesso?.has(`${funcionario.id}-${dia.numero}`);
                   return (
                     <td
                       key={dia.numero}
@@ -175,7 +183,11 @@ export default function TabelaEscala({ dias, funcionarios, mapa, diasComAlerta, 
                       <button
                         type="button"
                         onClick={() => onAlternarStatus(funcionario.id, dia.numero)}
-                        title={`${funcionario.nome} — dia ${dia.numero}: ${visual.rotulo} (clique para alternar)`}
+                        title={
+                          emExcesso
+                            ? `${funcionario.nome} — dia ${dia.numero}: passou do limite de dias seguidos de trabalho`
+                            : `${funcionario.nome} — dia ${dia.numero}: ${visual.rotulo} (clique para alternar)`
+                        }
                         style={{
                           width: "100%",
                           height: 38,
@@ -184,6 +196,8 @@ export default function TabelaEscala({ dias, funcionarios, mapa, diasComAlerta, 
                           color: visual.texto,
                           fontSize: 11,
                           fontWeight: 700,
+                          // Dias que estouraram o teto de trabalho consecutivo.
+                          boxShadow: emExcesso ? `inset 0 0 0 2px ${CORES.erro}` : "none",
                         }}
                       >
                         {visual.sigla}

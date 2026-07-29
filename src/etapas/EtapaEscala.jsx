@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, CalendarDays, LayoutGrid, Sun, Users } from "lucide-react";
 import BannerAlertas from "./escala/BannerAlertas";
+import BannerJornada from "./escala/BannerJornada";
 import CoberturaDominical from "./escala/CoberturaDominical";
 import TabelaEscala from "./escala/TabelaEscala";
 import Campo from "../componentes/Campo";
@@ -10,6 +11,8 @@ import ResumoCard from "../componentes/ResumoCard";
 import { CORES, botaoSecundario, entrada, tituloCartao } from "../estilos";
 import { CICLO_STATUS, MESES, TIPOS_ESCALA } from "../constantes";
 import { calcularAlertas, coberturaDominical } from "../logica/alertas";
+import { maxDiasSeguidos } from "../logica/gerarEscala";
+import { alertasDeJornada } from "../logica/jornada";
 import { analisarViabilidade } from "../logica/viabilidade";
 import { ordenarPorNome, setoresDaEquipe } from "../utils";
 
@@ -37,6 +40,15 @@ export default function EtapaEscala({ escala, setEscala, funcionarios, config, o
   const domingos = useMemo(
     () => coberturaDominical({ dias, mapa, funcionarios, diasComAlerta }),
     [dias, mapa, funcionarios, diasComAlerta]
+  );
+
+  // A geracao respeita o teto de dias seguidos, mas a edicao manual das celulas
+  // nao passa por ela — por isso a conferencia roda sobre o mapa atual.
+  const limiteDiasSeguidos = useMemo(() => maxDiasSeguidos(modelo.ciclo), [modelo]);
+
+  const { lista: violacoesDeJornada, celulasEmExcesso } = useMemo(
+    () => alertasDeJornada({ dias, mapa, funcionarios, limite: limiteDiasSeguidos }),
+    [dias, mapa, funcionarios, limiteDiasSeguidos]
   );
 
   // Explica por que certos dias ficaram em falta quando a exigencia era impossivel.
@@ -76,6 +88,12 @@ export default function EtapaEscala({ escala, setEscala, funcionarios, config, o
       <h2 style={{ ...tituloCartao, fontSize: 17 }}>
         3. Escala Gerada — {MESES[escala.mes]} {escala.ano} — {modelo.rotulo.toUpperCase()}
       </h2>
+
+      <BannerJornada
+        violacoes={violacoesDeJornada}
+        limite={limiteDiasSeguidos}
+        modelo={modelo.rotulo}
+      />
 
       <PainelViabilidade problemas={problemasDeViabilidade} contexto="escala" />
 
@@ -123,6 +141,7 @@ export default function EtapaEscala({ escala, setEscala, funcionarios, config, o
         funcionarios={funcionariosExibidos}
         mapa={mapa}
         diasComAlerta={diasComAlerta}
+        celulasEmExcesso={celulasEmExcesso}
         onAlternarStatus={alternarStatus}
       />
 

@@ -79,6 +79,7 @@ Nem toda configuração tem solução — às vezes não existe arranjo de folga
 | --- | --- | --- |
 | **Âmbar — viabilidade** | Na etapa 2 (enquanto configura) e no topo da etapa 3 | Nenhuma combinação de folgas atenderia esses mínimos. É preciso mudar a configuração ou a equipe. |
 | **Vermelho — cobertura** | Na etapa 3 | Dias específicos que ficaram abaixo do mínimo na escala gerada. Se não houver problema de viabilidade, é só desencaixe da rotação e dá para ajustar clicando nas células. |
+| **Vermelho — jornada** | Na etapa 3, acima dos demais | Funcionários que passaram do teto de dias consecutivos de trabalho. Como a geração respeita o teto, isso normalmente vem da edição manual das células. Os dias em excesso ficam contornados em vermelho na tabela. |
 
 O diagnóstico de viabilidade (`src/logica/viabilidade.js`) faz três verificações, sempre no **melhor cenário possível** — só acusa impossibilidade quando ela é matematicamente certa, nunca por suposição:
 
@@ -98,6 +99,8 @@ Dois pontos furavam o ciclo e por isso a regra é aplicada como passo final da g
 - o modo **fixas na semana** folga só no dia escolhido, o que daria 6 dias seguidos mesmo numa escala de 5.
 
 Quando a sequência estoura, entra uma folga. Se o dia excedente for um domingo já definido pela regra dos domingos, a folga recua um dia, para não desfazer a distribuição dominical.
+
+A edição manual das células não passa pela geração e por isso poderia furar esse teto sem aviso. Para cobrir isso, `src/logica/jornada.js` reconfere o limite sobre a escala como ela está na tela — a qualquer clique — e alimenta o banner de jornada e o contorno vermelho das células em excesso.
 
 ## Distribuição dos domingos
 
