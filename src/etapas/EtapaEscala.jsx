@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, CalendarDays, LayoutGrid, Sun, Users } from "lucide-react";
+import { ArrowLeft, CalendarDays, FileDown, LayoutGrid, Sun, Users } from "lucide-react";
 import BannerAlertas from "./escala/BannerAlertas";
 import BannerJornada from "./escala/BannerJornada";
 import CoberturaDominical from "./escala/CoberturaDominical";
@@ -8,9 +8,10 @@ import Campo from "../componentes/Campo";
 import Cartao from "../componentes/Cartao";
 import PainelViabilidade from "../componentes/PainelViabilidade";
 import ResumoCard from "../componentes/ResumoCard";
-import { CORES, botaoSecundario, entrada, tituloCartao } from "../estilos";
+import { CORES, botaoPrimario, botaoSecundario, entrada, tituloCartao } from "../estilos";
 import { CICLO_STATUS, MESES, TIPOS_ESCALA } from "../constantes";
 import { calcularAlertas, coberturaDominical } from "../logica/alertas";
+import { imprimirDocumento, montarDocumento } from "../logica/documentoEscala";
 import { maxDiasSeguidos } from "../logica/gerarEscala";
 import { alertasDeJornada } from "../logica/jornada";
 import { analisarViabilidade } from "../logica/viabilidade";
@@ -69,6 +70,27 @@ export default function EtapaEscala({ escala, setEscala, funcionarios, config, o
     return ordenarPorNome(filtrados);
   }, [funcionarios, filtroSetor, ordenacao]);
 
+  // O PDF sai pela caixa de impressao do navegador ("Salvar como PDF"). A tabela
+  // segue o filtro e a ordenacao da tela; os totais da equipe e a cobertura
+  // dominical continuam olhando todo mundo.
+  function gerarPdf() {
+    const documento = montarDocumento({
+      escala,
+      equipe: funcionarios,
+      funcionariosDaTabela: funcionariosExibidos,
+      modeloRotulo: modelo.rotulo,
+      modoFolgas: config.modoFolgas,
+      feriados: config.feriados,
+      filtroSetor,
+      domingos,
+      alertas,
+      violacoesDeJornada,
+      problemasDeViabilidade,
+      limiteDiasSeguidos,
+    });
+    imprimirDocumento(documento);
+  }
+
   function alternarStatus(idFuncionario, dia) {
     setEscala((atual) => {
       const statusAtual = atual.mapa[idFuncionario]?.[dia] || "T";
@@ -85,9 +107,23 @@ export default function EtapaEscala({ escala, setEscala, funcionarios, config, o
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      <h2 style={{ ...tituloCartao, fontSize: 17 }}>
-        3. Escala Gerada — {MESES[escala.mes]} {escala.ano} — {modelo.rotulo.toUpperCase()}
-      </h2>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+        }}
+      >
+        <h2 style={{ ...tituloCartao, fontSize: 17 }}>
+          3. Escala Gerada — {MESES[escala.mes]} {escala.ano} — {modelo.rotulo.toUpperCase()}
+        </h2>
+        <button type="button" style={botaoPrimario} onClick={gerarPdf}>
+          <FileDown size={16} />
+          Gerar PDF
+        </button>
+      </div>
 
       <BannerJornada
         violacoes={violacoesDeJornada}
@@ -171,10 +207,14 @@ export default function EtapaEscala({ escala, setEscala, funcionarios, config, o
 
       <CoberturaDominical domingos={domingos} />
 
-      <div>
+      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 12 }}>
         <button type="button" style={botaoSecundario} onClick={onVoltar}>
           <ArrowLeft size={16} />
           Voltar para Configuração
+        </button>
+        <button type="button" style={botaoPrimario} onClick={gerarPdf}>
+          <FileDown size={16} />
+          Gerar PDF da escala
         </button>
       </div>
     </div>

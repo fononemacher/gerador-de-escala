@@ -36,7 +36,7 @@ A aplicação tem 3 etapas, navegáveis pelo stepper no topo.
 
 ### 1. Funcionários
 
-Cadastro da equipe (nome, função, sexo e turno opcional). A aplicação já inicia com 30 funcionários pré-cadastrados. É possível editar e remover registros; a edição carrega os dados de volta no formulário e atualiza o mesmo registro ao salvar.
+Cadastro da equipe (nome, função, sexo e turno opcional). A aplicação começa sem ninguém cadastrado — a equipe é montada pelo próprio usuário. É possível editar e remover registros; a edição carrega os dados de volta no formulário e atualiza o mesmo registro ao salvar.
 
 O botão **Limpar todos os funcionários**, no topo do card, esvazia a lista inteira. Como não há desfazer nem persistência, ele pede confirmação em dois passos antes de apagar.
 
@@ -61,6 +61,7 @@ Tabela com um dia por coluna e um funcionário por linha:
 - Painel âmbar de **viabilidade** quando a configuração é impossível de cumprir (ver abaixo)
 - Filtro por setor e ordenação por nome ou por setor — o filtro afeta apenas a exibição; alertas, resumo e cobertura dominical continuam considerando toda a equipe
 - Resumo da escala e cobertura de cada domingo do mês
+- Botão **Gerar PDF** (ver abaixo)
 
 ### Status
 
@@ -70,6 +71,19 @@ Tabela com um dia por coluna e um funcionário por linha:
 | `F` | Folga |
 | `FE` | Feriado Trabalhado |
 | `FC` | Folga Compensatória |
+
+## PDF da escala
+
+O botão **Gerar PDF**, na etapa 3, monta o documento e abre a caixa de impressão do navegador — o PDF sai pela opção *Salvar como PDF* (ou vai direto para a impressora, se a escala for para o quadro de avisos). Não há dependência de bibliotecas de PDF: o documento é HTML com CSS de impressão, o que mantém as cores e a identidade da tela.
+
+Estrutura do documento (`src/logica/documentoEscala.js`):
+
+- **Uma semana por página**, de domingo a sábado. Os dias que pertencem ao mês vizinho aparecem como colunas cinzas sem número, de modo que todas as páginas tenham as mesmas 7 colunas e fiquem alinhadas quando empilhadas.
+- Equipes grandes rendem **várias páginas por semana** (20 funcionários por página), numeradas como "Página 1 de 2".
+- Feriados ganham `*` no número do dia e a lista dos nomes no rodapé da página.
+- **Páginas de resumo** ao final: os quatro cartões da tela, a tabela de totais por funcionário (dias trabalhados, folgas, feriados trabalhados, folgas em domingo e maior sequência de trabalho), a cobertura dominical e, quando existirem, os avisos de viabilidade, de jornada e de cobertura mínima.
+
+A tabela do PDF respeita o filtro de setor e a ordenação escolhidos na tela — dá para imprimir só o açougue, por exemplo. Já os totais da equipe e a cobertura dominical continuam olhando todo mundo, como nos painéis.
 
 ## Alertas: dois níveis
 
@@ -124,4 +138,7 @@ src/
   logica/
     gerarEscala.js            geração da escala do mês
     alertas.js                conferência de cobertura mínima
+    jornada.js                teto de dias consecutivos sobre a escala atual
+    viabilidade.js            diagnóstico de configuração impossível
+    documentoEscala.js        documento de impressão (PDF) da escala
 ```
