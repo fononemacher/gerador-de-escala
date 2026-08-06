@@ -36,7 +36,7 @@ A aplicação tem 3 etapas, navegáveis pelo stepper no topo.
 
 ### 1. Funcionários
 
-Cadastro da equipe (nome, função, sexo e turno opcional). A aplicação começa sem ninguém cadastrado — a equipe é montada pelo próprio usuário. É possível editar e remover registros; a edição carrega os dados de volta no formulário e atualiza o mesmo registro ao salvar.
+Cadastro da equipe (nome, função, sexo e turno opcional). A aplicação já inicia com 30 funcionários pré-cadastrados. É possível editar e remover registros; a edição carrega os dados de volta no formulário e atualiza o mesmo registro ao salvar.
 
 O botão **Limpar todos os funcionários**, no topo do card, esvazia a lista inteira. Como não há desfazer nem persistência, ele pede confirmação em dois passos antes de apagar.
 
