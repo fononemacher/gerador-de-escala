@@ -25,6 +25,7 @@ Há duas frentes vivas em paralelo:
 | `src/logica/` | Motor e conferências: `gerarEscala.js`, `alertas.js`, `viabilidade.js`, `jornada.js`, `documentoEscala.js` |
 | `docs/requisitos.md` | Levantamento de requisitos completo, já revisado com a reunião e as decisões posteriores |
 | `docs/estimativa.md` | Estimativa de esforço da Fase 1 (600–925h) |
+| `docs/alternativa-planilha.md` | Variante de arquitetura em avaliação: a planilha carrega o estado, sem banco de dados (345–560h) |
 | `README.md` | Instalação, uso, alertas, limite de dias consecutivos, distribuição de domingos, PDF |
 
 **Branch**: todo o trabalho está na **`main`**, tip `4f59113`.
@@ -152,6 +153,7 @@ FERIADOS:      <dia> | <nome>
 2. **Confirmar a premissa do turno contratual** com a especialista de folha.
 3. **Quem hospeda a infraestrutura** — custo recorrente que entra na proposta.
 4. **Prova de conceito da busca local do motor** (2 semanas). É a maior incerteza técnica e derruba boa parte do risco da estimativa.
+5. **Decidir entre a arquitetura com banco de dados e a alternativa da planilha** (`docs/alternativa-planilha.md`). A segunda corta ~40% do prazo em troca de histórico centralizado, auditoria, acesso simultâneo e backup. A decisão muda o escopo inteiro e precisa vir antes do orçamento final.
 
 ### Insumos a coletar
 
