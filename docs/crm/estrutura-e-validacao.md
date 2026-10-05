@@ -2,11 +2,9 @@
 
 Proposta de estrutura para o CRM interno da Kepha, **antes de qualquer desenvolvimento**. Serve para validar com o time como cada funcionalidade vai funcionar e para fechar as decisões que mudam o desenho do backend.
 
-**Base**: prints do RD Station CRM usado hoje — quadro de negociações e página da negociação "Captação de Recursos — Mobiis" (05/10/2026) · duas rodadas de respostas (seção 10) · contexto dos projetos da Kepha registrado neste repositório (`docs/handoff.md`).
+**Base**: prints do RD Station CRM usado hoje — quadro de negociações e página da negociação "Captação de Recursos — Mobiis" (05/10/2026) · duas rodadas de respostas (seção 10) · contexto dos projetos da Kepha registrado no repositório `gerador-de-escala` (`docs/handoff.md`).
 
-**Estado**: as decisões estão na seção 10. **Nada mais bloqueia o modelo de dados.** O que falta (seção 9) é necessário para o primeiro deploy, não para começar o código.
-
-> **Onde este documento vai morar.** O CRM é um produto diferente do gerador de escalas e terá repositório próprio. Este arquivo fica aqui só até esse repositório existir.
+**Estado**: as decisões estão na seção 10. **Nada mais bloqueia o modelo de dados.** O que falta (seção 9) é necessário para o primeiro deploy, não para começar o código. Este arquivo foi movido para o repositório `crm-kepha` (`docs/estrutura-e-validacao.md`) e esta cópia sai daqui assim que o repositório estiver no GitHub.
 
 ---
 
@@ -84,7 +82,7 @@ erDiagram
 
 | Campo | Observação |
 | --- | --- |
-| `cnpj` | Único quando preenchido, com validação dos dígitos. Opcional para quem ainda não tem CNPJ conhecido, pessoa física ou empresa estrangeira. |
+| `cnpj` | Único quando preenchido, com validação dos dígitos. Aceita o CNPJ alfanumérico, emitido pela Receita desde julho de 2026. Opcional para quem ainda não tem CNPJ conhecido, pessoa física ou empresa estrangeira. |
 | `razao_social`, `nome_fantasia` | Preenchidos pela consulta de CNPJ. O fantasia é editável. |
 | `cnae_principal`, `porte`, `endereco`, `cidade`, `uf` | Vêm da consulta de CNPJ; substituem o campo "Segmento" do RD, que está vazio. |
 | `site`, `telefone`, `linkedin` | Validados no cadastro (O18). |
@@ -128,11 +126,13 @@ A ligação com a negociação fica em `negociacao_contatos`, com o papel do con
 | `previsao_fechamento` | Opcional. |
 | `motivo_perda_id`, `detalhe_perda`, `concorrente` | Motivo obrigatório ao perder. |
 | `ganha_em`, `perdida_em` | |
-| `etapa_desde`, `ultima_atividade_em`, `proxima_atividade_id`, `atividades_atrasadas` | Ver a nota abaixo. |
+| `etapa_desde`, `ultima_atividade_em` | Ver a nota abaixo. |
 | `pasta_drive_id` | Pasta da negociação no OneDrive da Kepha (5.5). |
 | `versao` | Controle de concorrência: duas pessoas editando o mesmo card. |
 
-Os campos de etapa e de atividade são **copiados de propósito** para a própria negociação. O quadro mostra esses dados em todos os cards, e guardá-los ali evita uma consulta por card. A camada de serviço os atualiza na mesma transação da mudança que os afeta.
+`etapa_desde` e `ultima_atividade_em` são **copiados de propósito** para a própria negociação, porque só mudam quando alguém grava algo. A camada de serviço os atualiza na mesma transação da mudança que os afeta.
+
+Tarefas atrasadas e próxima tarefa **não** ficam guardadas: dependem do relógio. Uma tarefa de amanhã vira atrasada sem que ninguém mexa nela. O quadro calcula as duas na leitura, com uma consulta para todos os cards.
 
 #### negociacao_responsaveis
 
@@ -231,6 +231,7 @@ Arquivos não têm tabela própria: a pasta no OneDrive é a fonte da verdade (5
 
 - Toda negociação aberta deveria ter uma tarefa futura.
 - Ao concluir uma tarefa, o sistema abre na hora o formulário da próxima, já ligado à negociação. Dá para pular, mas o card passa a exibir **"Sem próximo passo"** em destaque.
+- "Sem próximo passo" aparece quando não há **nenhuma** tarefa aberta. Se só houver tarefa vencida, o card mostra o atraso, para não dar dois alertas sobre a mesma coisa.
 - O card mostra duas informações separadas: **quantas tarefas estão atrasadas** e **qual é a próxima tarefa futura**. Hoje o RD mostra só a mais atrasada e esconde o resto (O2, O16).
 - **Sinalizar, não bloquear** (P9). Obrigar a criar tarefa para conseguir salvar gera tarefa falsa só para passar.
 
@@ -267,6 +268,7 @@ As outras etapas não exigem nada (P10).
 Fica na fase 1 (D15) porque é simples. A consulta é uma chamada a um serviço público e gratuito, sem chave de acesso (BrasilAPI). Se o serviço estiver fora do ar, o cadastro segue à mão: nada trava.
 
 - Digita o CNPJ e o sistema preenche razão social, fantasia, CNAE, endereço, UF e natureza jurídica.
+- A validação aceita o CNPJ alfanumérico, que a Receita emite desde julho de 2026 (letras nas 12 primeiras posições).
 - Os dados vêm da base mensal da Receita e podem atrasar algumas semanas, o que basta para cadastro.
 - Se o CNPJ já existe, abre a empresa existente em vez de criar outra.
 - Sem CNPJ, aceita só o nome, mas antes de salvar mostra as empresas de nome parecido. Teria pegado "Elite Locações Ltda" × "ELITE LOCACOES DE PLATAFORMAS…" (O3).
@@ -395,7 +397,7 @@ scripts/
   migracao-rd/          extração, transformação e carga do RD Station
 ```
 
-Um módulo não acessa tabela de outro diretamente; chama o serviço dele. Mover uma negociação, por exemplo, passa por `negociacoes`, que pede a `funis` a conferência do portão. Depois grava a negociação, o `historico_etapas` e a auditoria na mesma transação.
+Cada tabela só é **escrita** pelo serviço do seu módulo, que grava junto o histórico e a auditoria. Ler a tabela de outro módulo para validar ou exibir é permitido: num sistema deste tamanho, passar toda leitura por outro serviço só criaria código intermediário. Mover uma negociação, por exemplo, passa por `negociacoes`, que pede a `funis` a conferência do portão. Depois grava a negociação, o `historico_etapas` e a auditoria na mesma transação.
 
 ### 5.4 API — rotas principais
 
