@@ -2,9 +2,9 @@
 
 Proposta de estrutura para o CRM interno da Kepha, **antes de qualquer desenvolvimento**. Serve para validar com o time como cada funcionalidade vai funcionar e para fechar as decisões que mudam o desenho do backend.
 
-**Base**: prints do RD Station CRM usado hoje — quadro de negociações e página da negociação "Captação de Recursos — Mobiis" (05/10/2026) · respostas às perguntas da primeira rodada (seção 10) · contexto dos projetos da Kepha registrado neste repositório (`docs/handoff.md`).
+**Base**: prints do RD Station CRM usado hoje — quadro de negociações e página da negociação "Captação de Recursos — Mobiis" (05/10/2026) · duas rodadas de respostas (seção 10) · contexto dos projetos da Kepha registrado neste repositório (`docs/handoff.md`).
 
-**Estado**: as decisões tomadas estão na seção 10. O resto é proposta. As perguntas da seção 9 marcadas como **bloqueantes** precisam de resposta antes do primeiro código.
+**Estado**: as decisões estão na seção 10. **Nada mais bloqueia o modelo de dados.** O que falta (seção 9) é necessário para o primeiro deploy, não para começar o código.
 
 > **Onde este documento vai morar.** O CRM é um produto diferente do gerador de escalas e terá repositório próprio. Este arquivo fica aqui só até esse repositório existir.
 
@@ -18,26 +18,26 @@ Antes de desenhar o novo, vale ler o que o atual revela. Cada linha vira requisi
 
 | # | Observação | O que significa | Consequência no CRM novo |
 | --- | --- | --- | --- |
-| O1 | 22 negociações abertas. Só a etapa "Negociando" tem valor (R$ 112.759,99), e mesmo nela há cards sem valor (Mobiis, Grupo Plátano). As outras etapas somam R$ 0,00. | O valor só aparece no fim do funil. Previsão de receita não existe hoje. | Valor obrigatório a partir de uma etapa (portão, R3) e previsão ponderada pela probabilidade da etapa. |
+| O1 | 22 negociações abertas. Só a etapa "Negociando" tem valor (R$ 112.759,99), e mesmo nela há cards sem valor (Mobiis, Grupo Plátano). As outras etapas somam R$ 0,00. | O valor só aparece no fim do funil, quando aparece. | Valor continua opcional (D12), mas a coluna mostra quantas negociações estão sem valor, para o total não enganar (R8). |
 | O2 | Dos 21 cards visíveis, **15 não têm nenhuma tarefa aberta** e **6 exibem tarefa vencida**: 03/06, 08/06, 27/08, 23/09 e duas de 25/09. A mais antiga está parada há quatro meses. | O próximo passo não é registrado, ou é registrado e não é baixado. O card mostra só a tarefa mais atrasada: a Mobiis tem um follow-up em dia para 15/10, que o quadro esconde (O16). | Regra do próximo passo (R1) e de negociação parada (R2). O card mostra o atraso **e** a próxima tarefa. **É o ponto mais importante do sistema.** |
-| O3 | A mesma empresa aparece duas vezes com nomes diferentes: "ELITE LOCACOES DE PLATAFORMAS E EQUIPAMENT…" (Alinhamento) e "Elite Locações Ltda" (Negociando), ambas com "Captação Recursos Fomento - Giro Fácil". | Empresa duplicada no cadastro, e possivelmente negociação duplicada também. | CNPJ como chave única, consulta automática aos dados públicos e aviso de nome parecido (R5). |
+| O3 | A mesma empresa aparece duas vezes com nomes diferentes: "ELITE LOCACOES DE PLATAFORMAS E EQUIPAMENT…" (Alinhamento) e "Elite Locações Ltda" (Negociando), ambas com "Captação Recursos Fomento - Giro Fácil". | Empresa duplicada no cadastro, e possivelmente negociação duplicada também. | CNPJ como chave única, consulta aos dados públicos e aviso de nome parecido (R5). |
 | O4 | Pluma Agroavícola tem 3 negociações abertas: inovação/BRDE, ISO e captação. | Um cliente com várias frentes ao mesmo tempo. | Página da empresa com todas as negociações, contatos e histórico consolidados. |
-| O5 | O tipo de serviço está escrito no título: "Captação de Recursos", "IA", "Implementação de ISO", "LGPD", "Desenvolvimento Software", "Consultoria Sebrae". A grafia varia ("Captação", "Capitação", "captacao"). | Não dá para filtrar nem medir por linha de serviço. | Campo estruturado **Linha de serviço**, com título sugerido automaticamente (R6). |
-| O6 | Há valor único (R$ 29.900,00) e valor recorrente (R$ 71.880,00). Há também R$ 999,99, que parece valor de preenchimento. | Mais de um modelo de cobrança. | Cobrança flexível (3.3). |
+| O5 | O tipo de serviço está escrito no título: "Captação de Recursos", "IA", "Implementação de ISO", "LGPD", "Desenvolvimento Software", "Consultoria Sebrae". A grafia varia ("Captação", "Capitação", "captacao"). | Não dá para filtrar nem medir por produto. | Campo estruturado **Produto**, com filtro (D17) e título sugerido (R6). |
+| O6 | Há valor único (R$ 29.900,00) e valor recorrente (R$ 71.880,00). Há também R$ 999,99, que parece valor de preenchimento. | Dois tipos de valor, que precisam ser distinguidos. | Dois campos livres, um único e um recorrente, com rótulos inconfundíveis (3.3). |
 | O7 | Qualificação em estrelas = 1 em todos os cards. | Campo não usado. | Remover (P12). |
 | O8 | Etiqueta "Nova" × "Em andamento" nos cards. | Significado não está claro. | Definir ou remover (P12). |
-| O9 | "IA em órgão público — Prefeitura de Cambé". | Cliente do setor público, com rito de contratação próprio. | Empresa marcada como setor público. O funil é o mesmo (D5). |
+| O9 | "IA em órgão público — Prefeitura de Cambé". | Cliente do setor público. | Empresa marcada como setor público, no mesmo funil. |
 | O10 | O RD tem "Priorizar negociações", "IA para Negociações" e rastreio de leitura de e-mail. | Recursos que o time pode estar usando, ou não. | Saber o que é usado antes de replicar (P11). |
 
 ### 1.2 Página da negociação (Mobiis)
 
 | # | Observação | O que significa | Consequência no CRM novo |
 | --- | --- | --- | --- |
-| O11 | **Responsável: "CRM Kepha".** Todo o histórico ("CRM Kepha criou a tarefa", "CRM Kepha fez uma anotação") sai desse usuário. | O time compartilha uma única conta no RD. Hoje não se sabe quem fez o quê, nem quem cuida de cada negociação. | Login individual com a conta Microsoft (D7), autoria automática em tudo e responsáveis por negociação (D3). O histórico migrado fica sem autoria individual, porque essa informação não existe no RD. |
-| O12 | O funil se chama **"Kepha 2026"**. | Provavelmente um funil por ano. | Um funil permanente; o recorte por ano vira filtro de data (P20). |
+| O11 | **Responsável: "CRM Kepha".** O histórico da Mobiis sai desse usuário. O time tem usuários individuais no RD; "CRM Kepha" é um usuário genérico a mais (D11). | Parte das negociações e do histórico não tem dono identificável. | No CRM novo todo login é pessoal (conta Microsoft). Ações automáticas aparecem como "Sistema". Na migração, as negociações sob "CRM Kepha" são reatribuídas (seção 8). |
+| O12 | O funil se chama **"Kepha 2026"**. | Provavelmente um funil por ano. | Um funil permanente, com filtro por mês e ano (D16, D17). |
 | O13 | Etapas completas: Lista Sem Contato → Em Conversa → Apresentado a Kepha → Alinhamento de Projeto → Negociando → Contrato. O cabeçalho mostra "Negociando (10 dias)". | Tempo na etapa já é uma informação que o time vê. | Etapas da R3; tempo na etapa no card e na negociação (R2). |
-| O14 | Em "Negociando", previsão de fechamento e valor total estão **vazios**. Qualificação = 1. Campanha vazia. | Os campos que alimentariam a previsão não são preenchidos. | Portões de etapa (R3). Campanha e qualificação saem (P12). |
-| O15 | A anotação fixada diz: *"Incluso na proposta a tabela exemplificativa do cálculo da taxa de sucesso. A pedido do Cliente."* | O êxito é calculado por uma tabela, e o cliente pede para vê-la. | Êxito com tabela de faixas (3.3) — preciso ver a tabela real (P3a). Anotação fixada no topo do histórico. |
+| O14 | Em "Negociando", previsão de fechamento e valor total estão **vazios**. Qualificação = 1. Campanha vazia. | Os campos de previsão não são preenchidos. | Valor não vira obrigatório (D12). Campanha e qualificação saem (P12). |
+| O15 | A anotação fixada diz: *"Incluso na proposta a tabela exemplificativa do cálculo da taxa de sucesso. A pedido do Cliente."* | A tabela de êxito varia de proposta para proposta. | O CRM não modela o êxito (D13): a tabela fica no arquivo da proposta. Anotação fixada no topo do histórico. |
 | O16 | "O e-mail foi lido: Kepha - Proposta Comercial…" é uma **tarefa criada automaticamente** pelo rastreio de leitura, hoje atrasada. Ao lado dela há um follow-up em dia para 15/10. | Tarefas automáticas que ninguém baixa viram ruído de atraso. | O card mostra atraso e próxima tarefa separadamente (R1). Rastreio de leitura fica fora da fase 1 (P11). |
 | O17 | Duas origens diferentes: **Fonte** da negociação = "Cliente Ativo"; **Origem** da empresa = "Networking Kepha". Também existe o campo "Segmentos Kepha: Retailtech - Varejo". | Uma origem diz como a relação começou; a outra, de onde veio esta oportunidade. A Kepha também tem uma segmentação própria de clientes. | Os dois campos ficam, cada um no seu lugar, com "Segmento Kepha" como lista configurável. |
 | O18 | Empresa Mobiis: CNPJ vazio; o site é um link de busca do Bing; telefone com DDD 46 (Paraná) e estado SP. O celular do contato tem um dígito a menos que o da empresa (99269113 × 999269113). | Cadastro digitado à mão, sem conferência. | Consulta de CNPJ preenche endereço e UF (R5); validação de telefone e de site. Limpeza na migração (seção 8). |
@@ -48,11 +48,11 @@ Antes de desenhar o novo, vale ler o que o atual revela. Cada linha vira requisi
 ## 2. Princípios de desenho
 
 1. **Dimensionado para a Kepha.** São 4 a 5 pessoas e dezenas de negociações abertas. Um projeto só, com um banco Postgres, resolve tudo. Cada peça a mais é algo a manter.
-2. **O sistema cobra atualização.** CRM desatualizado é pior do que nenhum, porque dá falsa segurança (O2). As regras de próximo passo e de negociação parada são centrais, não acessórias.
+2. **O sistema cobra atualização, sem burocracia.** CRM desatualizado é pior do que nenhum, porque dá falsa segurança (O2). O próximo passo e a negociação parada são sinalizados com destaque; o resto é opcional (D12).
 3. **Histórico desde o primeiro dia.** Conversão por etapa, tempo em cada etapa e ciclo de venda dependem de registrar cada movimentação no momento em que acontece. Isso não se reconstrói depois.
 4. **A empresa é a âncora; a negociação é a oportunidade.** Uma empresa (CNPJ) tem vários contatos e várias negociações ao longo do tempo (O4).
 5. **Nada se apaga de verdade.** Exclusão lógica e trilha de auditoria. Perder uma negociação é um status, não uma exclusão.
-6. **Portável desde o início.** A hospedagem começa na Vercel (D9), mas as regras de negócio não dependem dela e o banco é Postgres padrão. Mudar de casa depois troca só a camada de entrada.
+6. **Portável e sem custo de hospedagem.** O código roda igual na Vercel, no Cloudflare ou num servidor próprio, e o banco é Postgres padrão. Trocar de hospedagem é trocar a configuração de deploy, não o código (5.2).
 
 ---
 
@@ -66,14 +66,12 @@ erDiagram
     EMPRESAS ||--o{ NEGOCIACOES : "tem"
     NEGOCIACOES ||--|{ NEGOCIACAO_RESPONSAVEIS : "1 ou mais"
     USUARIOS ||--o{ NEGOCIACAO_RESPONSAVEIS : "é responsável"
+    NEGOCIACOES ||--o{ NEGOCIACAO_PRODUTOS : "1 ou mais"
+    PRODUTOS ||--o{ NEGOCIACAO_PRODUTOS : "classifica"
     FUNIS ||--|{ ETAPAS : "dividido em"
     ETAPAS ||--o{ NEGOCIACOES : "contém"
-    LINHAS_SERVICO ||--o{ NEGOCIACOES : "classifica"
-    LINHAS_SERVICO ||--o{ SERVICOS : "agrupa"
     NEGOCIACOES ||--o{ NEGOCIACAO_CONTATOS : "envolve"
     CONTATOS ||--o{ NEGOCIACAO_CONTATOS : "participa"
-    NEGOCIACOES ||--o{ COBRANCAS : "compõem o valor"
-    SERVICOS ||--o{ COBRANCAS : "modelo padrão"
     NEGOCIACOES ||--o{ ATIVIDADES : "tarefas e registros"
     USUARIOS ||--o{ ATIVIDADES : "executa"
     NEGOCIACOES ||--o{ HISTORICO_ETAPAS : "movimentações"
@@ -94,7 +92,7 @@ erDiagram
 | `origem_id` | Como a relação com a empresa começou ("Networking Kepha"). |
 | `setor_publico` | Derivado da natureza jurídica do CNPJ (grupo 1 = administração pública). |
 | `papeis` | Marcações manuais: parceiro, órgão de fomento, fornecedor. |
-| `pasta_drive_id` | Pasta da empresa no OneDrive (5.5). |
+| `pasta_drive_id` | Pasta da empresa no OneDrive da Kepha (5.5). |
 
 - A situação comercial (prospect, cliente, ex-cliente) **é calculada** a partir das negociações, não digitada. Assim não fica desatualizada.
 - Empresa não tem responsável próprio. Com todos vendo tudo (D2), quem cuida dela são os responsáveis pelas negociações.
@@ -107,39 +105,34 @@ erDiagram
 | `email` | Aviso de duplicidade quando já existe. |
 | `telefone`, `whatsapp` | Formato internacional, validado (celular com 9 dígitos), com link que abre a conversa. |
 | `empresa_id` | Empresa atual. |
-| `base_legal` | LGPD; legítimo interesse por padrão (5.4). |
+| `base_legal` | LGPD; legítimo interesse por padrão (5.7). |
 
 A ligação com a negociação fica em `negociacao_contatos`, com o papel do contato naquela venda (decisor, influenciador, técnico, financeiro) e qual é o principal.
 
 #### funis e etapas
 
-`etapas` guarda, além de nome e ordem:
-
-- `probabilidade` — % usada na previsão ponderada;
-- `dias_limite` — prazo para a negociação ser sinalizada como parada (R2);
-- `campos_obrigatorios` — o portão de entrada da etapa (R3).
-
-Tudo configurável pelo admin, sem mexer em código. Começa com um funil só (D5).
+- O CRM começa com **um funil permanente**, "Kepha", com as etapas de O13 (D16).
+- O admin pode criar outros funis quando precisar, cada um com as suas etapas.
+- Uma negociação pode ser **movida para outro funil**: escolhe-se a etapa de destino, e a mudança fica no histórico.
+- `etapas` guarda nome, ordem, `dias_limite` (prazo para a negociação ser sinalizada como parada, R2) e `campos_obrigatorios` (portão de entrada, R3).
 
 #### negociacoes
 
 | Campo | Observação |
 | --- | --- |
-| `titulo` | Sugerido como "Linha de serviço — Empresa", editável (R6). |
+| `titulo` | Sugerido como "Produto — Empresa", editável (R6). |
 | `empresa_id`, `funil_id`, `etapa_id` | Obrigatórios. |
-| `linha_servico_id` | Obrigatório. Resolve O5. |
 | `status` | aberta · ganha · perdida. |
+| `valor_unico`, `valor_recorrente_mensal` | Opcionais (D12). Ver 3.3. |
 | `fonte_id`, `parceiro_indicador_id` | De onde veio esta oportunidade ("Cliente Ativo") e, se for o caso, o parceiro que indicou (ex.: Grupo CRK). |
-| `previsao_fechamento`, `probabilidade` | A probabilidade herda da etapa e pode ser ajustada. |
-| `valor_estimado` | Número único para as etapas iniciais, antes de existir cobrança detalhada. |
-| indicadores de valor | Calculados das cobranças (3.3): único, MRR, valor do contrato, êxito potencial. |
-| `motivo_perda_id`, `detalhe_perda`, `concorrente` | Obrigatório ao perder. |
+| `previsao_fechamento` | Opcional. |
+| `motivo_perda_id`, `detalhe_perda`, `concorrente` | Motivo obrigatório ao perder. |
 | `ganha_em`, `perdida_em` | |
 | `etapa_desde`, `ultima_atividade_em`, `proxima_atividade_id`, `atividades_atrasadas` | Ver a nota abaixo. |
-| `pasta_drive_id` | Pasta da negociação no OneDrive (5.5). |
+| `pasta_drive_id` | Pasta da negociação no OneDrive da Kepha (5.5). |
 | `versao` | Controle de concorrência: duas pessoas editando o mesmo card. |
 
-Os campos de etapa, de atividade e os indicadores de valor são **copiados de propósito** para a própria negociação. O quadro mostra esses dados em todos os cards, e guardá-los ali evita uma consulta por card. A camada de serviço os atualiza na mesma transação da mudança que os afeta.
+Os campos de etapa e de atividade são **copiados de propósito** para a própria negociação. O quadro mostra esses dados em todos os cards, e guardá-los ali evita uma consulta por card. A camada de serviço os atualiza na mesma transação da mudança que os afeta.
 
 #### negociacao_responsaveis
 
@@ -154,6 +147,12 @@ Liga a negociação a **um ou mais** usuários (D3). Não existe responsável pr
 
 A **tarefa** continua com um único responsável: quem vai executá-la.
 
+#### negociacao_produtos e produtos
+
+- `produtos` é um catálogo simples: nome e ativo. Lista inicial a partir do RD: Captação de Recursos, IA, Desenvolvimento de Software, ISO, LGPD, Gestão da Inovação, Consultoria, e os produtos SaaS da Kepha.
+- Uma negociação tem **um ou mais produtos** (D17). O filtro por produto traz as negociações que contêm aquele produto.
+- O produto não carrega preço: o valor fica na negociação (3.3).
+
 #### atividades — tarefas e registros numa tabela só
 
 | Campo | Observação |
@@ -163,7 +162,7 @@ A **tarefa** continua com um único responsável: quem vai executá-la.
 | `agendada_para` | Data e hora. Vazio em anotação. |
 | `concluida_em`, `resultado` | O que aconteceu. |
 | `responsavel_id` | Quem executa. |
-| `criado_por` | Preenchido pelo login; no histórico migrado, o usuário "Legado RD Station" (O11). |
+| `criado_por` | Preenchido pelo login. No histórico migrado, o autor do RD (seção 8). |
 | `fixada` | Anotação fixada no topo do histórico (O15). |
 | `negociacao_id`, `empresa_id`, `contato_id` | Pelo menos um preenchido. |
 | `origem`, `id_externo` | manual · e-mail · agenda. O id externo evita duplicar na sincronização da fase 2. |
@@ -173,9 +172,9 @@ A **tarefa** continua com um único responsável: quem vai executá-la.
 
 #### historico_etapas
 
-Colunas: `negociacao_id`, etapa de origem → etapa de destino, status de origem → status de destino, `movido_por` e `movido_em`.
+Colunas: `negociacao_id`, funil e etapa de origem → funil e etapa de destino, status de origem → status de destino, `movido_por` e `movido_em`.
 
-É gravado na mesma transação de **toda** mudança de etapa ou de status, inclusive ganhar, perder e reabrir. É a fonte de todos os relatórios de conversão e tempo (R11).
+É gravado na mesma transação de **toda** mudança de etapa, de funil ou de status, inclusive ganhar, perder e reabrir. É a fonte de todos os relatórios de conversão e tempo (R11).
 
 #### auditoria
 
@@ -183,67 +182,30 @@ Colunas: `entidade`, `entidade_id`, `acao`, `alteracoes` (JSON com o antes e o d
 
 Responde perguntas como "quem mudou o valor desta negociação e quando".
 
-### 3.3 Cobrança flexível
+### 3.3 Valor
 
-A Kepha cobra de vários jeitos e combina esses jeitos (D4). A estrutura precisa aceitar qualquer combinação sem mudar código.
+Dois campos livres, os dois opcionais (D12, D14):
 
-**Como funciona.** O valor de uma negociação não é um número: é uma **lista de cobranças**. Cada cobrança tem um tipo, e cada tipo tem os seus campos.
-
-| Tipo | Campos | Exemplo |
+| Campo | O que é | Exemplos |
 | --- | --- | --- |
-| Único | Valor, número de parcelas, previsão do primeiro pagamento | Consultoria: R$ 29.900 em 3 parcelas |
-| Recorrente | Valor por período, periodicidade (mensal, trimestral, anual), prazo em períodos ou "sem prazo", início previsto | SaaS: R$ 5.990/mês por 12 meses |
-| Êxito | Base estimada (valor a captar); percentual fixo **ou** tabela de faixas; mínimo e teto opcionais; gatilho do pagamento (aprovação, contratação ou liberação do recurso) | Captação: 3% sobre R$ 2 milhões, pago na liberação |
-| Variável | Quantidade estimada × valor unitário, com a unidade (hora, diária, usuário) | 40 horas de consultoria a R$ 250 |
+| **Valor único** ("na cabeça") | Pago uma vez | Projeto, implantação, consultoria, entrada de captação |
+| **Valor recorrente** | Cobrado todo mês, em R$/mês | SaaS, mensalidade, retainer |
 
-Qualquer cobrança aceita desconto, em % ou em valor.
+**A diferença é visível em todo lugar.**
 
-**Combinações.** Uma negociação tem quantas cobranças precisar:
+- O formulário tem os dois campos lado a lado. O recorrente vem com o sufixo "/mês" dentro do campo.
+- O card, a lista e os relatórios usam sempre os rótulos "único" e "/mês". Exemplo de card: **"R$ 29.900 único · R$ 5.990/mês"**.
+- Os dois **nunca são somados num número só**. Um é total, o outro é por mês: somar R$ 29.900 com R$ 5.990/mês não significa nada. O cabeçalho da coluna mostra as duas somas separadas.
 
-- Captação: entrada de R$ 5.000 (único) + 3% de êxito.
-- SaaS: implantação de R$ 8.000 (único) + R$ 1.500/mês por 24 meses (recorrente).
-- Projeto: R$ 60.000 em 4 parcelas (único) + horas extras sob demanda (variável).
+**Êxito não é modelado** (D13): a tabela varia demais de proposta para proposta. Ela fica no arquivo da proposta e, se for o caso, numa anotação.
 
-**Modelos no catálogo.** Cada serviço do catálogo tem um modelo de cobrança padrão. Escolher "Captação de Recursos" numa negociação já cria "Entrada (único)" + "Êxito (% sobre o valor captado)", e o time só ajusta os números. Uma combinação nova não pede código: vira um modelo novo no catálogo, ou cobranças adicionadas à mão.
-
-**Tabela de faixas do êxito.** Há duas formas comuns de aplicar faixas. Com faixas de 5% até R$ 1 milhão e 3% acima, sobre uma captação de R$ 2 milhões:
-
-| Forma | Cálculo | Êxito |
-| --- | --- | --- |
-| Progressiva (como o IR): cada faixa incide sobre a sua fatia | 5% × 1 mi + 3% × 1 mi | R$ 80.000 |
-| Por faixa: o valor inteiro paga o percentual da faixa em que cai | 3% × 2 mi | R$ 60.000 |
-
-O sistema aceita as duas, escolhida por tabela. A forma que a Kepha usa vira o padrão (P3a).
-
-**O que o sistema calcula.** Cada cobrança gera indicadores, somados na negociação:
-
-| Indicador | Cálculo | Onde aparece |
-| --- | --- | --- |
-| Único | Soma das cobranças únicas | Card, relatórios |
-| MRR | Recorrentes convertidas para mês (anual ÷ 12, trimestral ÷ 3) | Card ("R$ 1.500/mês"), relatório de receita recorrente |
-| Valor do contrato | Único + recorrente × prazo + variável. Recorrente sem prazo conta 12 meses (P3b) | Total do quadro, previsão ponderada |
-| Êxito potencial | Êxito calculado sobre a base estimada | **À parte**, com destaque próprio |
-
-No card: **"R$ 8 mil + R$ 1,5 mil/mês · êxito ~R$ 60 mil"**.
-
-O êxito fica fora do total do quadro porque depende de um evento que a venda não controla: a aprovação do recurso. Se entrasse no total, uma captação de R$ 10 milhões a 3% dominaria a previsão com dinheiro que pode não vir.
-
-**Armazenamento.** Uma tabela `cobrancas` guarda:
-
-- os campos comuns em colunas: tipo, serviço, descrição, desconto;
-- os indicadores calculados em colunas, para os relatórios somarem direto;
-- os campos específicos de cada tipo num JSON validado por tipo (faixas, gatilho, periodicidade).
-
-Um parâmetro novo, como reajuste anual, entra no JSON sem migração de banco.
-
-**Propostas congelam as cobranças.** Cada versão de proposta guarda uma cópia das cobranças no momento do envio. Assim a V1.0 e a V1.1 mostram o que mudou, mesmo que a negociação continue sendo editada.
+**Sem valor obrigatório, o total precisa avisar que está incompleto.** O cabeçalho da coluna mostra quantas negociações estão sem valor: "R$ 112 mil único · 2 de 6 sem valor". Assim ninguém lê o total como previsão completa.
 
 ### 3.4 Demais tabelas
 
 | Tabela | Conteúdo |
 | --- | --- |
-| `propostas` | Negociação, versão (1.0, 1.1…), status (rascunho · enviada · aceita · recusada · expirada), cópia das cobranças, validade, data de envio, arquivo no OneDrive. |
-| `linhas_servico`, `servicos` | Catálogo, com o modelo de cobrança padrão de cada serviço. Lista inicial a partir do RD: Captação de Recursos, IA, Desenvolvimento de Software, SaaS, ISO, LGPD, Gestão da Inovação, Consultoria. |
+| `propostas` | Negociação, versão (1.0, 1.1…), status (rascunho · enviada · aceita · recusada · expirada), validade, data de envio, arquivo no OneDrive. |
 | `fontes`, `origens` | Fonte da negociação ("Cliente Ativo") e origem da empresa ("Networking Kepha"). Migradas do RD. |
 | `segmentos_kepha` | "Retailtech - Varejo" e as demais. Migrados do RD. |
 | `motivos_perda` | Migrados do RD e revistos. |
@@ -265,8 +227,6 @@ Arquivos não têm tabela própria: a pasta no OneDrive é a fonte da verdade (5
 
 ## 4. Como as funcionalidades vão funcionar
 
-Cada regra é proposta e precisa de validação.
-
 ### R1 — Próximo passo
 
 - Toda negociação aberta deveria ter uma tarefa futura.
@@ -276,26 +236,25 @@ Cada regra é proposta e precisa de validação.
 
 ### R2 — Negociação parada
 
-- Cada etapa tem um prazo (ex.: Em Conversa 15 dias, Negociando 10 dias).
+- Cada etapa tem um prazo (ex.: 15 dias).
 - Passou do prazo na mesma etapa, o card ganha o sinal **"Parada há N dias"** e entra no resumo diário dos responsáveis.
 - É diferente da R1: uma negociação pode ter tarefas em dia e mesmo assim não sair do lugar há dois meses.
-- Prazos iniciais a definir com o time (P10).
 
 ### R3 — Portões de etapa
 
-Mover para certas etapas exige campos preenchidos. Se faltar algo, o card não muda de etapa e o sistema abre um formulário só com o que falta. Proposta inicial, com as etapas reais (O13):
+Mover para certas etapas exige um campo preenchido. Se faltar, o card não muda de etapa e o sistema abre um formulário só com o que falta.
+
+**Nenhum portão exige valor** (D12). A previsão de fechamento também é opcional.
 
 | Para entrar em | Exige |
 | --- | --- |
 | Em Conversa | Contato principal |
-| Apresentado a Kepha | Linha de serviço |
-| Alinhamento de Projeto | Valor estimado e previsão de fechamento |
-| Negociando | Cobranças detalhadas e proposta registrada (R7) |
-| Contrato | Proposta aceita |
-| Ganha | Data de assinatura |
+| Apresentado a Kepha | Produto |
+| Negociando | Proposta registrada (R7) |
+| Ganha | Data de assinatura (vem preenchida com hoje) |
 | Perdida | Motivo de perda |
 
-Com isso, a Mobiis não estaria em "Negociando" com valor e previsão vazios (O14).
+As outras etapas não exigem nada (P10).
 
 ### R4 — Ganhar, perder, reabrir
 
@@ -305,29 +264,41 @@ Com isso, a Mobiis não estaria em "Negociando" com valor e previsão vazios (O1
 
 ### R5 — Cadastro de empresa por CNPJ
 
-- Digita o CNPJ e o sistema consulta os dados públicos da Receita (ex.: BrasilAPI) para preencher razão social, fantasia, CNAE, endereço, UF e natureza jurídica.
+Fica na fase 1 (D15) porque é simples. A consulta é uma chamada a um serviço público e gratuito, sem chave de acesso (BrasilAPI). Se o serviço estiver fora do ar, o cadastro segue à mão: nada trava.
+
+- Digita o CNPJ e o sistema preenche razão social, fantasia, CNAE, endereço, UF e natureza jurídica.
+- Os dados vêm da base mensal da Receita e podem atrasar algumas semanas, o que basta para cadastro.
 - Se o CNPJ já existe, abre a empresa existente em vez de criar outra.
 - Sem CNPJ, aceita só o nome, mas antes de salvar mostra as empresas de nome parecido. Teria pegado "Elite Locações Ltda" × "ELITE LOCACOES DE PLATAFORMAS…" (O3).
 - **Fusão de duplicadas**: o admin escolhe a empresa principal e o sistema move contatos, negociações e histórico para ela.
 
 ### R6 — Título automático
 
-O sistema sugere "Linha de serviço — Empresa" (ex.: "Captação de Recursos — Mobiis"), e o título continua editável. A linha de serviço vira filtro e dimensão de relatório.
+O sistema sugere "Produto — Empresa" (ex.: "Captação de Recursos — Mobiis"), e o título continua editável.
 
 ### R7 — Propostas versionadas
 
-- Cada negociação guarda suas versões de proposta (V1.0, V1.1…), com status, cobranças congeladas (3.3), validade e arquivo.
+- Cada negociação guarda suas versões de proposta (V1.0, V1.1…), com status, validade e arquivo.
 - Marcar uma proposta como enviada registra a atividade na linha do tempo.
 - Na fase 1 o arquivo é enviado para a pasta da negociação. Gerar a partir do modelo .docx da Kepha fica para a fase 2.
 
-### R8 — Quadro
+### R8 — Quadro, lista e filtros
 
-- As colunas são as etapas do funil. O cabeçalho de cada uma mostra a quantidade de negociações, o valor do contrato total e ponderado (valor × probabilidade) e, à parte, o êxito potencial.
-- O card mostra a empresa, os responsáveis (iniciais), o resumo de valor, o atraso e a próxima tarefa (R1), e o sinal de parada (R2).
-- Arrastar entre colunas muda a etapa, passando pelos portões da R3.
-- Dentro da coluna, a ordem segue um critério escolhido (próxima tarefa, valor, criação). Não há ordenação manual.
-- Filtros: **responsável** (um ou vários, com atalho "Minhas"), status, linha de serviço, fonte, segmento Kepha, tags, período de criação ou de fechamento, "sem próximo passo", "atrasadas" e "paradas".
-- A mesma consulta alimenta a visão de lista: tabela com colunas escolhidas e exportação CSV.
+- O quadro mostra **um funil por vez**, com as etapas como colunas.
+- **Cabeçalho da coluna**: quantidade de negociações, soma do valor único, soma do recorrente (/mês) e quantas estão sem valor.
+- **Card**: empresa, responsáveis (iniciais), produtos, valores, atraso e próxima tarefa (R1), sinal de parada (R2).
+- Arrastar entre colunas muda a etapa, passando pelos portões da R3. Dentro da coluna, a ordem segue um critério escolhido (próxima tarefa, valor, criação).
+- A lista mostra as negociações de **todos os funis** juntos, em tabela com colunas escolhidas e exportação CSV.
+
+**Filtros** (D17), iguais no quadro, na lista e nos relatórios:
+
+| Filtro | Como funciona |
+| --- | --- |
+| Responsável | Um ou vários, com atalho "Minhas". |
+| Produto | Um ou vários. |
+| Mês e ano | Sobre uma data escolhida: criação (padrão), previsão de fechamento ou ganho/perda (P23). Aceita mês, ano ou intervalo. |
+| Funil | Na lista e nos relatórios. |
+| Outros | Status, fonte, segmento Kepha, tags, "sem próximo passo", "atrasadas", "paradas". |
 
 ### R9 — Minhas tarefas
 
@@ -335,7 +306,7 @@ Três blocos: atrasadas, hoje e próximos 7 dias. Concluir é um clique e dispar
 
 ### R10 — Resumo diário
 
-Um e-mail por pessoa às 8h, enviado pela caixa do CRM no Microsoft 365, com:
+Um e-mail por pessoa pela manhã, enviado pela conta da Kepha no Microsoft 365, com:
 
 - tarefas do dia;
 - tarefas atrasadas;
@@ -344,15 +315,16 @@ Um e-mail por pessoa às 8h, enviado pela caixa do CRM no Microsoft 365, com:
 
 ### R11 — Relatórios da fase 1
 
-- Funil: quantidade e valor por etapa, total e ponderado, com o êxito potencial à parte.
-- Conversão entre etapas e taxa de ganho, por período, linha de serviço, fonte e responsável.
+Todos com os filtros da R8 (responsável, produto, mês, ano, funil):
+
+- Funil: quantidade e valores por etapa, com quantas estão sem valor.
+- Conversão entre etapas e taxa de ganho.
 - Tempo médio em cada etapa e ciclo total de venda.
 - Motivos de perda.
-- Previsão de fechamento por mês, ponderada.
-- Receita recorrente (MRR) contratada e em negociação.
+- Ganhos por mês: valor único e recorrente (/mês) fechados.
 - Atividades por pessoa.
 
-Todos saem de `historico_etapas`, `negociacoes` e `cobrancas`. É por isso que o histórico precisa existir desde o primeiro dia.
+Todos saem de `historico_etapas` e `negociacoes`. É por isso que o histórico precisa existir desde o primeiro dia.
 
 ---
 
@@ -360,51 +332,65 @@ Todos saem de `historico_etapas`, `negociacoes` e `cobrancas`. É por isso que o
 
 ### 5.1 Stack
 
-Ajustada à decisão de hospedar no GitHub + Vercel (D9) e usar Microsoft 365 (D7) e OneDrive (D8).
+Escolhida para rodar sem custo de hospedagem (D19) e poder mudar de casa sem reescrever.
 
 | Camada | Escolha | Por quê |
 | --- | --- | --- |
-| Aplicação | Next.js (App Router) em TypeScript: front e API num projeto só | É o formato nativo da Vercel: um repositório, um deploy. |
-| Regras de negócio | `src/modulos/*` em TypeScript puro, sem depender do Next | Se a hospedagem mudar, só a camada HTTP muda (princípio 6). |
-| Banco | PostgreSQL na Neon, integração oficial da Vercel, com conexão em pool | A Vercel não tem Postgres próprio. A Neon é a integração nativa e serverless. É Postgres padrão: muda de casa com `pg_dump`. |
-| Migrations | Drizzle | Leve e sem dependência nativa, bom para funções serverless. A estrutura do banco fica versionada no repositório. |
-| Login | Auth.js com Microsoft Entra ID | Login com a conta Microsoft da Kepha, restrito ao tenant da empresa **e** aos usuários cadastrados no CRM. |
-| Arquivos | OneDrive/SharePoint via Microsoft Graph | D8. Detalhes em 5.5. |
-| E-mail do sistema | Microsoft Graph, a partir de uma caixa compartilhada do CRM (ex.: `crm@…`) | Resumo diário sem contratar serviço de e-mail. Caixa compartilhada não consome licença. |
-| Tarefas agendadas | Vercel Cron chamando rotas protegidas por segredo | Na Vercel não há processo rodando o tempo todo. Substitui a fila que eu tinha proposto antes. |
-| Front | React (no Next), TanStack Query, dnd-kit para arrastar cards | |
+| Front | React + Vite, TanStack Query, dnd-kit para arrastar cards | Mesma base do protótipo do gerador. Gera arquivos estáticos, que qualquer hospedagem serve. |
+| API | Hono em TypeScript | Roda sem mudança na Vercel, no Cloudflare Workers e em Node. É leve o bastante para os limites dos planos gratuitos. Next.js, que eu tinha proposto, é pesado demais para o plano gratuito do Cloudflare. |
+| Regras de negócio | `src/modulos/*` em TypeScript puro | Não dependem da hospedagem nem do framework HTTP. |
+| Banco | PostgreSQL na Neon, plano gratuito | Permite uso comercial. 0,5 a 1 GB por projeto é folga: texto ocupa pouco e os arquivos ficam no OneDrive. O driver da Neon funciona na Vercel e no Cloudflare. |
+| Migrations | Drizzle | Leve, sem dependência nativa. A estrutura do banco fica versionada no repositório. |
+| Login | OpenID Connect com Microsoft Entra ID | Login com a conta Microsoft da Kepha, restrito ao tenant da empresa **e** aos usuários cadastrados no CRM. |
+| Arquivos | OneDrive da Kepha via Microsoft Graph | D18. Detalhes em 5.5. |
+| E-mail do sistema | Microsoft Graph, enviando pela conta da Kepha | Resumo diário sem contratar serviço de e-mail. |
+| Agendamento | O agendador do provedor de hospedagem | Ver 5.2. |
 | Ambientes | `main` → produção. Cada pull request ganha uma pré-visualização com **banco separado** (branch da Neon), nunca o de produção | Testar sem tocar em dado real. |
-| Backup | O da Neon + cópia diária própria: GitHub Actions roda `pg_dump` e guarda no OneDrive | A restauração do plano gratuito da Neon cobre pouco tempo. A cópia própria não depende do fornecedor. |
+| Backup | O da Neon + cópia diária própria: GitHub Actions roda `pg_dump` e guarda no OneDrive da Kepha | A cópia própria não depende do fornecedor. |
 
-### 5.2 Pontos de atenção da Vercel
+### 5.2 Hospedagem sem plano pago
 
-1. **Plano.** O plano gratuito (Hobby) é restrito a uso pessoal e não comercial. Um CRM da empresa precisa do **Pro** (P18). O Pro é cobrado por membro que mexe no projeto na Vercel, não por usuário do CRM.
-2. **Agendamento.** No Hobby, cada tarefa agendada roda no máximo uma vez por dia e sem horário exato. O Pro resolve isso.
-3. **Tempo de execução.** Funções têm tempo máximo de execução. A migração do RD não roda na Vercel: é um script executado à parte, uma vez (seção 8).
-4. **Região.** Funções e banco na mesma região, para cada consulta não atravessar continentes.
+Decisão: sem Vercel Pro (D19). Há um ponto que precisa da sua decisão (P21).
+
+**O plano gratuito da Vercel (Hobby) não permite uso comercial.**
+
+- Os termos da Vercel definem uso comercial como qualquer deploy usado para ganho financeiro de alguém envolvido no projeto.
+- Um CRM interno de empresa se enquadra.
+- O risco é a Vercel suspender o projeto e o CRM sair do ar.
+
+| Opção | Uso comercial | Agendamento | Observação |
+| --- | --- | --- | --- |
+| **Cloudflare Workers, plano gratuito** (recomendada) | Permitido | Horário certo (o resumo sai às 8h) | Deploy direto do GitHub. 100 mil requisições por dia, muito acima do uso de 5 pessoas. |
+| Vercel Hobby | **Não permitido** pelos termos | Uma vez por dia, em qualquer minuto da hora marcada (o resumo das 8h pode chegar até 8h59) | Funciona tecnicamente, com o risco de suspensão. |
+
+O código é o mesmo nas duas: muda só a configuração de deploy. Por isso a P21 não trava o início do desenvolvimento.
+
+Nos dois casos, a migração do RD não roda na hospedagem: é um script executado à parte, uma vez (seção 8).
 
 ### 5.3 Módulos
 
 ```
-src/
-  app/                  telas e rotas HTTP (Next) — camada fina
-    api/cron/           rotas chamadas pelo Vercel Cron
-  modulos/
-    auth/               login Microsoft, usuários e papéis
-    empresas/           cadastro, consulta de CNPJ, deduplicação, fusão
-    contatos/
-    funis/              funis, etapas, portões, prazos
-    negociacoes/        cadastro, responsáveis, mover, ganhar/perder/reabrir
-    cobrancas/          tipos de cobrança, faixas de êxito, indicadores
-    atividades/         tarefas, registros, agenda
-    propostas/          versões e cópia das cobranças
-    relatorios/
-    busca/
-    notificacoes/       resumo diário e alertas
-    microsoft/          Graph: arquivos no OneDrive, envio de e-mail, (fase 2) caixa e agenda
-  compartilhado/
-    auditoria/          registra toda alteração
-    db/                 conexão, transações, migrations
+web/                    front (React + Vite)
+api/
+  src/
+    http/               rotas Hono — camada fina
+    agendadas/          resumo diário (chamado pelo agendador do provedor)
+    modulos/
+      auth/             login Microsoft, usuários e papéis
+      empresas/         cadastro, consulta de CNPJ, deduplicação, fusão
+      contatos/
+      funis/            funis, etapas, portões, prazos, troca de funil
+      negociacoes/      cadastro, responsáveis, produtos, valores, mover, ganhar/perder/reabrir
+      atividades/       tarefas, registros, agenda
+      propostas/
+      catalogo/         produtos, fontes, origens, segmentos, motivos de perda
+      relatorios/
+      busca/
+      notificacoes/     resumo diário e alertas
+      microsoft/        Graph: arquivos, envio de e-mail, (fase 2) caixa e agenda
+    compartilhado/
+      auditoria/        registra toda alteração
+      db/               conexão, transações, migrations
 scripts/
   migracao-rd/          extração, transformação e carga do RD Station
 ```
@@ -415,13 +401,11 @@ Um módulo não acessa tabela de outro diretamente; chama o serviço dele. Mover
 
 | Rota | Faz |
 | --- | --- |
-| `GET /api/funis/:id/quadro` | Colunas com contagem, totais e os cards de cada etapa, já filtrados |
-| `GET /api/negociacoes` | Lista paginada com filtros e ordenação (visão de lista e exportação) |
+| `GET /api/funis/:id/quadro` | Colunas com contagem, somas e os cards de cada etapa, já filtrados |
+| `GET /api/negociacoes` | Lista paginada de todos os funis, com filtros e ordenação (visão de lista e exportação) |
 | `POST /api/negociacoes` | Cria, com pelo menos um responsável |
-| `PATCH /api/negociacoes/:id` | Edita. Exige `versao`: se outra pessoa alterou antes, devolve 409 e o front recarrega |
-| `PUT /api/negociacoes/:id/responsaveis` | Define os responsáveis (mínimo 1) |
-| `PUT /api/negociacoes/:id/cobrancas` | Substitui as cobranças e recalcula os indicadores |
-| `POST /api/negociacoes/:id/mover` | Muda de etapa. Se faltar campo do portão, devolve 422 com a lista do que falta |
+| `PATCH /api/negociacoes/:id` | Edita, inclusive valores, produtos e responsáveis. Exige `versao`: se outra pessoa alterou antes, devolve 409 e o front recarrega |
+| `POST /api/negociacoes/:id/mover` | Muda de etapa e, se informado, de funil. Se faltar campo do portão, devolve 422 com a lista do que falta |
 | `POST /api/negociacoes/:id/ganhar` · `/perder` · `/reabrir` | Mudanças de status, com as exigências da R4 |
 | `GET /api/negociacoes/:id/linha-do-tempo` | Atividades, mudanças de etapa, propostas e alterações, em ordem, com as anotações fixadas primeiro |
 | `GET /api/negociacoes/:id/arquivos` · `POST` | Lista e envia arquivos da pasta no OneDrive |
@@ -430,35 +414,33 @@ Um módulo não acessa tabela de outro diretamente; chama o serviço dele. Mover
 | `POST /api/empresas/:id/fundir` | Fusão de duplicadas (admin) |
 | `GET /api/atividades?situacao=atrasadas\|hoje\|proximas` | Minhas tarefas |
 | `POST /api/atividades/:id/concluir` | Conclui e devolve a sugestão da próxima (R1) |
-| `GET /api/relatorios/...` | Funil, conversão, tempo por etapa, perdas, previsão, MRR, atividades |
+| `GET /api/relatorios/...` | Funil, conversão, tempo por etapa, perdas, ganhos por mês, atividades |
 | `GET /api/busca?q=` | Busca global em empresas, contatos e negociações |
-| `POST /api/cron/resumo-diario` | Chamada pelo Vercel Cron às 8h (11h UTC) |
 
-### 5.5 Arquivos no OneDrive
+### 5.5 Arquivos no OneDrive da Kepha
 
-- **Biblioteca compartilhada, não o OneDrive pessoal de alguém** (P17). Pode ser um site do SharePoint do time, que aparece no OneDrive de todos. No OneDrive pessoal, se a pessoa sair da Kepha, os arquivos vão junto.
+- **Tudo fica no OneDrive da conta da Kepha** (D18), numa pasta raiz `CRM`. Essa pasta é compartilhada, com edição, com os usuários do CRM.
 - **Pastas criadas pelo CRM**: `CRM/<Empresa>/<Negociação>/`. O banco guarda o **id** da pasta, não o caminho, então renomear a empresa ou a negociação não quebra nada.
-- **A pasta é a fonte da verdade.** A aba Arquivos lista o conteúdo real da pasta via Graph. O que alguém arrastar para a pasta pelo OneDrive, ou salvar direto do Word, aparece no CRM.
-- **Envio em nome de quem está logado.** O arquivo aparece no OneDrive como enviado pela pessoa, não por um robô.
+- **A pasta é a fonte da verdade.** A aba Arquivos lista o conteúdo real da pasta. O que alguém arrastar para a pasta pelo OneDrive, ou salvar direto do Word, aparece no CRM.
+- **Envio em nome de quem está logado.** O CRM usa a permissão da própria pessoa sobre a pasta compartilhada, então o arquivo aparece como enviado por ela. Também evita dar ao CRM uma permissão geral de arquivos, que alcançaria o OneDrive de todo mundo no tenant.
 - **Abrir um arquivo** leva ao Office online.
+- **Usuário novo**: além do cadastro no CRM, recebe o compartilhamento da pasta `CRM`.
 
 ### 5.6 O que precisa ser feito no Microsoft 365
 
 Exige alguém com acesso de administrador (P16):
 
-1. **Registro do aplicativo no Entra ID.** Login dos usuários e permissões do Graph:
-   - acesso à biblioteca do CRM, em nome de quem está logado;
-   - envio de e-mail pela caixa do CRM, restrito a ela.
-2. **Caixa compartilhada** do CRM, para o resumo diário.
-3. **Biblioteca** (site do SharePoint) para os arquivos.
-4. **Consentimento do administrador** para as permissões acima.
+1. **Registrar o aplicativo do CRM no Entra ID**, para o login e o acesso ao Graph.
+2. **Compartilhar a pasta `CRM`** do OneDrive da Kepha com os usuários do time.
+3. **Autorizar o CRM a agir pela conta da Kepha** nas tarefas automáticas: envio do resumo diário e guarda do backup.
+4. **Dar o consentimento de administrador** às permissões acima.
 
 ### 5.7 Pontos transversais
 
 - **Permissões.** Todos veem tudo (D2), com dois papéis:
   - **Admin**: configura funis, etapas, catálogo, listas e usuários; faz fusões e exclusões.
   - **Comercial**: opera o dia a dia.
-- **Acesso.** Só entra quem tem conta Microsoft da Kepha **e** foi cadastrado no CRM. Ser desligado no Microsoft 365 corta o acesso ao CRM.
+- **Acesso.** Só entra quem tem conta Microsoft da Kepha **e** foi cadastrado no CRM. Ser desligado no Microsoft 365 corta o acesso ao CRM. Não há usuário genérico (O11).
 - **Auditoria.** Toda escrita passa por um ponto único que grava o antes e o depois, com o autor vindo do login.
 - **Concorrência.** O campo `versao` impede que uma edição sobrescreva outra sem aviso.
 - **Exclusão.** Lógica e restaurável pelo admin. Exclusão definitiva só por pedido de titular (LGPD).
@@ -468,33 +450,31 @@ Exige alguém com acesso de administrador (P16):
   - registrar quem acessou.
 
   A Kepha vende consultoria de LGPD: o próprio CRM precisa passar na régua que ela aplica nos clientes.
-- **Observabilidade.** Logs da Vercel e captura de erros.
+- **Observabilidade.** Logs do provedor e captura de erros.
 
 ### 5.8 Integrações
 
 | Integração | Fase 1 | Fase 2 |
 | --- | --- | --- |
-| Consulta de CNPJ | Sim | — |
+| Consulta de CNPJ | Sim (R5) | — |
 | OneDrive | Pastas por empresa e negociação, envio e listagem | — |
-| E-mail | Resumo diário pela caixa do CRM. Registro manual de e-mail na linha do tempo | Caixa de cada pessoa sincronizada via Graph: e-mails trocados com contatos aparecem na negociação |
+| E-mail | Resumo diário pela conta da Kepha. Registro manual de e-mail na linha do tempo | Caixa de cada pessoa sincronizada via Graph: e-mails trocados com contatos aparecem na negociação |
 | Agenda | — | Reunião criada no CRM vai para a agenda do Outlook/Teams, e vice-versa |
 | WhatsApp | Botão que abre a conversa + registro manual do tipo "WhatsApp" | API oficial, que tem custo por uso. Só se o volume justificar |
 | IA | — | Resumo da negociação, sugestão de próximo passo, rascunho de follow-up, priorização |
-| Propostas | Arquivo na pasta da negociação | Geração a partir do modelo .docx da Kepha, já com as cobranças e a tabela de êxito |
+| Propostas | Arquivo na pasta da negociação | Geração a partir do modelo .docx da Kepha |
 
 ---
 
 ## 6. Telas
 
-1. **Quadro de negociações**, com alternância para lista.
-2. **Negociação**: barra de etapas com dias na etapa, próximas tarefas, linha do tempo com anotações fixadas, responsáveis, contatos, cobranças, propostas, arquivos.
+1. **Quadro de negociações** (um funil por vez), com alternância para lista (todos os funis).
+2. **Negociação**: barra de etapas com dias na etapa, próximas tarefas, linha do tempo com anotações fixadas, responsáveis, produtos, valores, contatos, propostas, arquivos.
 3. **Empresa**: dados, contatos, todas as negociações (abertas, ganhas, perdidas) e linha do tempo consolidada.
 4. **Contato**.
 5. **Minhas tarefas**.
 6. **Relatórios**.
-7. **Configurações** (admin): funil e etapas (portão, probabilidade, prazo), catálogo de serviços com modelos de cobrança, fontes, origens, segmentos, motivos de perda, usuários.
-
-A importação de planilha saiu da fase 1: a migração do RD é feita por script (seção 8).
+7. **Configurações** (admin): funis e etapas (portão, prazo), produtos, fontes, origens, segmentos, motivos de perda, usuários.
 
 ---
 
@@ -502,7 +482,7 @@ A importação de planilha saiu da fase 1: a migração do RD é feita por scrip
 
 | Fase | Conteúdo |
 | --- | --- |
-| **1 — substitui o RD Station** | Modelo da seção 3, incluindo cobrança flexível; regras R1 a R11; login Microsoft; consulta de CNPJ e fusão de duplicadas; arquivos no OneDrive; resumo diário por e-mail; migração do RD; exportação CSV. |
+| **1 — substitui o RD Station** | Modelo da seção 3; regras R1 a R11; login Microsoft; consulta de CNPJ e fusão de duplicadas; arquivos no OneDrive da Kepha; resumo diário por e-mail; migração do RD; exportação CSV. |
 | **2** | Sincronização de e-mail e agenda, geração de proposta pelo modelo, IA, metas (D10), WhatsApp oficial, acompanhamento pós-venda (P7). |
 
 **Critério para virar a chave:** o time opera uma semana só no CRM novo, sem voltar ao RD, com os dados migrados conferidos.
@@ -511,48 +491,48 @@ A importação de planilha saiu da fase 1: a migração do RD é feita por scrip
 
 ## 8. Migração do RD Station
 
-1. **Extrair** pela API do RD Station CRM, com o token da conta: negociações abertas e fechadas, empresas, contatos, tarefas, anotações, produtos, fontes, motivos de perda e campos personalizados (como "Segmentos Kepha").
-2. **Guardar a exportação bruta no OneDrive.** Fica como registro permanente depois que a assinatura do RD acabar.
+1. **Extrair** pela API do RD Station CRM, com o token da conta: usuários, negociações abertas e fechadas, empresas, contatos, tarefas, anotações, produtos, fontes, motivos de perda e campos personalizados (como "Segmentos Kepha").
+2. **Guardar a exportação bruta no OneDrive da Kepha.** Fica como registro permanente depois que a assinatura do RD acabar.
 3. **Transformar**:
-   - Funis por ano ("Kepha 2026" e anteriores, se houver) → um funil só, com o ano preservado na data de criação (P20).
-   - Linha de serviço extraída do título, com revisão manual do que não casar (O5).
-   - Produtos do RD → cobranças. O êxito não existe no RD: é preenchido à mão nas captações abertas.
-   - Autor "CRM Kepha" → usuário "Legado RD Station". O histórico vem inteiro, mas sem autoria individual, porque ela não existe no RD (O11).
-   - **Responsáveis das negociações abertas**: o script gera uma planilha com as 22 abertas para o time preencher antes da carga.
-   - Empresas deduplicadas por CNPJ (consultado quando estiver vazio) e por nome parecido. A Elite Locações é um caso conhecido (O3).
-   - Telefones e sites inválidos sinalizados para correção (O18).
+   - **Usuários**: cada usuário do RD é ligado ao usuário do CRM pelo e-mail. O responsável único do RD vira o primeiro responsável da negociação.
+   - **"CRM Kepha"**: o histórico feito por ele vem com o autor "CRM Kepha (RD)". As negociações abertas sob ele entram numa planilha para o time indicar os responsáveis antes da carga (O11).
+   - **Funis**: "Kepha 2026" vira o funil permanente "Kepha". Outros funis do RD, se houver, são juntados ou mantidos conforme a P20.
+   - **Produtos**: os produtos do RD viram o catálogo. Nas negociações sem produto, o produto é extraído do título, com revisão manual do que não casar (O5).
+   - **Valores**: o valor único vai direto. Para o recorrente, é preciso conferir se o RD guarda o valor mensal ou o total do contrato. Os R$ 71.880,00 da Insuagro, por exemplo, podem ser 12 × R$ 5.990. Se for o total, o script converte para mensal.
+   - **Empresas**: deduplicadas por CNPJ (consultado quando estiver vazio) e por nome parecido. A Elite Locações é um caso conhecido (O3).
+   - **Dados inválidos**: telefones e sites inválidos sinalizados para correção (O18).
 4. **Carregar num banco de teste** e conferir quantidades e totais por etapa contra o RD.
 5. **Virar a chave** num dia combinado. O RD fica só para consulta até o fim da assinatura.
-
-O alcance da migração está na P5.
 
 ---
 
 ## 9. Perguntas em aberto
 
-### Bloqueantes
+### Antes do primeiro deploy
+
+Não travam o início do código.
 
 | # | Pergunta | Recomendação |
 | --- | --- | --- |
-| P3a | **Êxito**: a tabela de faixas é progressiva ou por faixa (3.3)? Tem mínimo ou teto? Quando o êxito é pago: na aprovação, na contratação ou na liberação do recurso — e, se a liberação vier em parcelas, o êxito acompanha? **Se puder, mande a tabela que foi na proposta da Mobiis.** | Aceitar as duas formas e definir como padrão a que a Kepha usa. |
-| P3b | **SaaS**: os contratos recorrentes são mensais ou anuais? Têm prazo? Quando não têm, quantos meses contar no valor do funil? | 12 meses para recorrente sem prazo. |
-| P16 | **Microsoft 365**: quem é o administrador? Ele precisa registrar o aplicativo, criar a caixa compartilhada e a biblioteca, e dar o consentimento (5.6). | — |
-| P17 | **OneDrive**: os arquivos ficam numa biblioteca compartilhada ou no OneDrive pessoal de alguém? | Biblioteca compartilhada (5.5). |
-| P18 | **Vercel**: ok assinar o plano Pro? O gratuito não permite uso comercial (5.2). | Pro. |
+| P16 | **Microsoft 365**: quem é o administrador? Ele precisa fazer os 4 passos de 5.6. | — |
+| P21 | **Hospedagem**: Vercel Hobby, aceitando o risco dos termos, ou Cloudflare gratuito (5.2)? | Cloudflare gratuito. |
 
-### Não bloqueantes — se não houver resposta, sigo a recomendação
+### Confirmações rápidas — se não houver resposta, sigo a recomendação
 
 | # | Pergunta | Recomendação |
 | --- | --- | --- |
-| P5 | O que migrar do RD: só as abertas, ou também ganhas e perdidas? Tarefas e anotações antigas? | Tudo o que a API entregar. Abertas e fechadas dos últimos 24 meses entram no CRM; o restante fica só na exportação bruta. |
-| P7 | O CRM termina no "ganho" ou acompanha a execução? Em captação, o êxito só se realiza se o recurso for aprovado. | Fase 1 termina no ganho. Acompanhar o resultado do edital na fase 2. |
+| P22 | O valor recorrente é sempre registrado por mês? | Sim, R$/mês. Contrato anual entra dividido por 12. |
+| P23 | O filtro de mês e ano olha qual data por padrão? | Data de criação, com opção de trocar para previsão de fechamento ou data de ganho/perda. |
+| P24 | Para que o usuário "CRM Kepha" é usado hoje: automação do RD, integração ou login compartilhado? | Não recriar. O que for automático aparece como "Sistema". |
+| P5 | O que migrar do RD? | Tudo o que a API entregar. Abertas e fechadas dos últimos 24 meses entram no CRM; o restante fica só na exportação bruta. |
+| P7 | O CRM termina no "ganho" ou acompanha a execução? | Fase 1 termina no ganho. |
 | P9 | Próximo passo: bloquear ou só sinalizar (R1)? | Sinalizar. |
-| P10 | A tabela de portões da R3 faz sentido? Qual o prazo de cada etapa para a R2? | Começar com a R3 como está e prazos de 15 dias em cada etapa, ajustando com o uso. |
-| P11 | "Priorizar negociações", "IA para Negociações" e rastreio de leitura de e-mail: alguém usa? | Fora da fase 1. O rastreio de leitura, em especial, é pouco confiável: vários clientes de e-mail abrem as imagens sozinhos e marcam como "lido" o que ninguém leu. |
+| P10 | Os portões da R3 fazem sentido? Qual o prazo de cada etapa para a R2? | Começar com a R3 como está e 15 dias em cada etapa, ajustando com o uso. |
+| P11 | "Priorizar negociações", "IA para Negociações" e rastreio de leitura de e-mail: alguém usa? | Fora da fase 1. O rastreio de leitura é pouco confiável: vários clientes de e-mail abrem as imagens sozinhos e marcam como "lido" o que ninguém leu. |
 | P12 | Qualificação (estrelas), Campanha, Questionários e a etiqueta "Nova"/"Em andamento": alguém usa? | Remover os quatro. "Nova" vira um sinal automático de "nenhuma interação ainda". |
 | P13 | Registrar o parceiro que indicou (ex.: Grupo CRK)? Há comissão? | Campo de parceiro indicador. Comissão só se houver acordo formal. |
 | P14 | O lembrete diário vai só por e-mail, ou também pelo Teams? | E-mail + aviso dentro do CRM. Teams na fase 2. |
-| P20 | Existem funis de anos anteriores ("Kepha 2025")? | Juntar tudo num funil só e usar o filtro de período. |
+| P20 | O RD tem outros funis além do "Kepha 2026"? | Juntar os de anos anteriores no funil "Kepha"; manter separado só o que for um processo diferente. |
 
 ---
 
@@ -563,10 +543,19 @@ O alcance da migração está na P5.
 | D1 | 05/10/2026 | Uso só interno. Sem separação de dados por organização. |
 | D2 | 05/10/2026 | 4 a 5 usuários. Todos veem tudo. |
 | D3 | 05/10/2026 | Cada negociação tem um ou mais responsáveis, com filtro por responsável. |
-| D4 | 05/10/2026 | Cobrança flexível: SaaS recorrente, serviços pontuais e êxito sobre o valor captado, combináveis entre si. |
-| D5 | 05/10/2026 | Um funil para todas as linhas de serviço. |
+| D4 | 05/10/2026 | ~~Cobrança flexível com modelo estruturado.~~ Substituída por D13 e D14. |
+| D5 | 05/10/2026 | Um funil para todas as linhas de serviço. Refinada por D16. |
 | D6 | 05/10/2026 | O CRM atual é o RD Station CRM. |
 | D7 | 05/10/2026 | E-mail corporativo é Microsoft 365. |
-| D8 | 05/10/2026 | Arquivos no OneDrive. |
-| D9 | 05/10/2026 | Hospedagem inicial no GitHub do usuário + Vercel. Migrar depois se fizer sentido. |
+| D8 | 05/10/2026 | Arquivos no OneDrive. Refinada por D18. |
+| D9 | 05/10/2026 | Hospedagem inicial no GitHub do usuário + Vercel. Migrar depois se fizer sentido. Ver D19 e P21. |
 | D10 | 05/10/2026 | Metas de venda ficam para a fase 2. |
+| D11 | 05/10/2026 | O time tem usuários individuais no RD; "CRM Kepha" é um usuário genérico a mais. |
+| D12 | 05/10/2026 | Campos de valor nunca são obrigatórios. |
+| D13 | 05/10/2026 | Êxito sem modelo estruturado: a tabela varia demais. |
+| D14 | 05/10/2026 | Valor em dois campos livres: valor único ("na cabeça") e valor recorrente, com a diferença sempre clara. |
+| D15 | 05/10/2026 | Consulta de CNPJ na fase 1, desde que simples; senão, fase 2. Avaliada como simples (R5). |
+| D16 | 05/10/2026 | Um funil permanente, com a opção de criar outros e mover oportunidades entre eles. |
+| D17 | 05/10/2026 | Filtros obrigatórios: responsável, mês, ano e produto. |
+| D18 | 05/10/2026 | Arquivos no OneDrive da conta da Kepha, não no de nenhuma pessoa. |
+| D19 | 05/10/2026 | Sem Vercel Pro. |
